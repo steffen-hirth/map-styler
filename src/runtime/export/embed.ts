@@ -47,7 +47,9 @@ export function embedSnippet(styleUrl: string, scriptUrl: string, view: View): s
     container: 'map',
     style: '${styleUrl}',
     center: [${view.center[0]}, ${view.center[1]}],
-    zoom: ${view.zoom}
+    zoom: ${view.zoom},
+    pitch: ${view.pitch ?? 0},
+    bearing: ${view.bearing ?? 0}
   });
   map.addControl(new maplibregl.NavigationControl());
   MapStylerTooltips.attach(map);
@@ -78,7 +80,9 @@ const map = new maplibregl.Map({
   container: 'map',
   style: ${styleJson},
   center: [${view.center[0]}, ${view.center[1]}],
-  zoom: ${view.zoom}
+  zoom: ${view.zoom},
+  pitch: ${view.pitch ?? 0},
+  bearing: ${view.bearing ?? 0}
 });
 map.addControl(new maplibregl.NavigationControl());
 MapStylerTooltips.attach(map);

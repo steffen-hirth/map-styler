@@ -20,7 +20,7 @@ export type InspectedFeature = {
   properties: Record<string, unknown>;
 };
 
-export type View = { center: [number, number]; zoom: number };
+export type View = { center: [number, number]; zoom: number; pitch?: number; bearing?: number };
 
 export type AppState = {
   status: 'loading' | 'ready' | 'error';

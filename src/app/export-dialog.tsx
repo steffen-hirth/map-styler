@@ -73,7 +73,11 @@ export function ExportDialog() {
 
 function ExportContent() {
   const style = useAppState((s) => s.style);
-  const json = useMemo(() => JSON.stringify(style, null, 2), [style]);
+  // The current view travels with the style; MapLibre uses it as start position.
+  const json = useMemo(() => {
+    const { center, zoom, pitch = 0, bearing = 0 } = store.view;
+    return JSON.stringify({ ...style, center, zoom, pitch, bearing }, null, 2);
+  }, [style]);
   const [fileName, setFileName] = useState(() => styleFileName(style));
   const [target, setTarget] = useState<CdnTarget>(() => {
     const prefs = readPrefs();

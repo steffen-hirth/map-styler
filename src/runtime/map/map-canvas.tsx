@@ -25,6 +25,8 @@ export function MapCanvas() {
       style: structuredClone(initial) as StyleSpecification,
       center: store.view.center,
       zoom: store.view.zoom,
+      pitch: store.view.pitch ?? 0,
+      bearing: store.view.bearing ?? 0,
       attributionControl: { compact: true },
     });
     map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right');
@@ -63,7 +65,12 @@ export function MapCanvas() {
 
     const onMoveEnd = () => {
       const c = map.getCenter();
-      store.setView({ center: [Number(c.lng.toFixed(5)), Number(c.lat.toFixed(5))], zoom: Number(map.getZoom().toFixed(2)) });
+      store.setView({
+        center: [Number(c.lng.toFixed(5)), Number(c.lat.toFixed(5))],
+        zoom: Number(map.getZoom().toFixed(2)),
+        pitch: Number(map.getPitch().toFixed(1)),
+        bearing: Number(map.getBearing().toFixed(1)),
+      });
     };
 
     const onClick = (e: maplibregl.MapMouseEvent) => {
