@@ -3,6 +3,7 @@
 
 import { groupOf } from '../runtime/style/spec';
 import { setLayerProp } from '../runtime/style/style-utils';
+import { GLASS_KEY, type GlassConfig } from '../runtime/glass';
 import type { Layer, Style } from '../runtime/style/types';
 import { boxImageId, patternImageId, type PatternChar } from '../runtime/tooltips/pin-icons';
 import type { Template } from './templates';
@@ -29,6 +30,8 @@ type GlassOptions = {
   ground: string;
   /** Soft glowing outline of the footprints, visible through the glass. */
   edge: string;
+  /** Settings for the WebGL glass renderer in the tooltip script. */
+  fx: Partial<GlassConfig>;
   light: Record<string, unknown>;
   sky: Record<string, unknown>;
 };
@@ -39,15 +42,17 @@ const HEIGHT = ['coalesce', ['get', 'render_height'], 0];
  * Glass buildings: clear, height-shaded extrusions that let the streets shine
  * through, plus a glowing footprint outline.
  */
-function glass({ low, high, opacity, ground, edge, light, sky }: GlassOptions) {
+function glass({ low, high, opacity, ground, edge, fx, light, sky }: GlassOptions) {
   return (style: Style): Style => {
     const layers: Layer[] = [];
+    let extrusion: string | null = null;
     for (const layer of style.layers) {
       if (groupOf(layer) === 'overlay') {
         layers.push(layer);
         continue;
       }
       if (layer.type === 'fill-extrusion') {
+        extrusion ??= layer.id;
         // Footprint glow first, so it is seen through the glass.
         layers.push({
           id: `${layer.id}-glass-edge`,
@@ -81,7 +86,10 @@ function glass({ low, high, opacity, ground, edge, light, sky }: GlassOptions) {
       }
       layers.push(layer);
     }
-    return { ...style, layers, light, sky };
+    // With the tooltip script, the extrusion is rendered as refracting glass;
+    // without it the translucent extrusion above is the fallback.
+    const metadata = extrusion ? { ...style.metadata, [GLASS_KEY]: { ...fx, layer: extrusion } } : style.metadata;
+    return { ...style, layers, light, sky, metadata };
   };
 }
 
@@ -347,6 +355,7 @@ export const FANCY_TEMPLATES: Template[] = [
           opacity: 0.28,
           ground: '#e9f1f6',
           edge: '#1fb4f0',
+          fx: { tint: '#dff4ff', tintStrength: 0.12, refraction: 16, blur: 1.5, rim: '#ffffff', rimStrength: 0.9, specular: 0.9 },
           light: { anchor: 'viewport', color: '#ffffff', intensity: 0.5, position: [1.4, 200, 35] },
           sky: {
             'sky-color': '#e3eef6',
@@ -411,6 +420,7 @@ export const FANCY_TEMPLATES: Template[] = [
       opacity: 0.38,
       ground: '#e2ebf3',
       edge: '#8fc2f2',
+      fx: { tint: '#cfe6fb', tintStrength: 0.22, refraction: 12, blur: 2.5, rim: '#ffffff', rimStrength: 0.7, specular: 0.6 },
       light: { anchor: 'viewport', color: '#ffffff', intensity: 0.45, position: [1.3, 210, 40] },
       sky: {
         'sky-color': '#cfe6fb',
@@ -459,6 +469,7 @@ export const FANCY_TEMPLATES: Template[] = [
       opacity: 0.45,
       ground: '#0c1726',
       edge: '#4fd8ff',
+      fx: { tint: '#0f3b52', tintStrength: 0.2, refraction: 16, blur: 1.5, rim: '#4fd8ff', rimStrength: 0.9, specular: 0.5 },
       light: { anchor: 'viewport', color: '#9fe8ff', intensity: 0.6, position: [1.3, 210, 40] },
       sky: {
         'sky-color': '#05070d',

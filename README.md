@@ -66,7 +66,7 @@ https://cdn.jsdelivr.net/gh/<user>/<repo>@v1.0.0/cdn/mapstyler-tooltips.js
 
 ## Tooltip runtime
 
-Tooltips need a small script (`cdn/mapstyler-tooltips.js`, about 5 KB, no dependencies besides MapLibre). The configuration lives in the `style.json` under `metadata["mapstyler:tooltips"]`, so one call is enough:
+Tooltips need a small script (`cdn/mapstyler-tooltips.js`, about 15 KB gzipped, no dependencies besides MapLibre). The configuration lives in the `style.json` under `metadata["mapstyler:tooltips"]`, so one call is enough:
 
 ```html
 <script src="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
@@ -96,6 +96,7 @@ For bundlers there is also `cdn/mapstyler-tooltips.mjs` as an ES module.
 | `{name}` | Value of the `name` property |
 | `{name:en\|name}` | First value present: `name:en`, otherwise `name` |
 | `{name\|'Unnamed'}` | Fixed text if no value is present |
+| `{kind_en}`, `{kind_de}` | Readable feature type from `subclass`/`class`, e.g. "Bus stop" / "Bushaltestelle" |
 | new line | New line in the tooltip; lines without values are dropped |
 | `<strong>`, `<em>`, `<span style="…">` | Simple HTML is allowed. Values are escaped, scripts and links removed. |
 
@@ -117,6 +118,22 @@ For bundlers there is also `cdn/mapstyler-tooltips.mjs` as an ES module.
   }
 }
 ```
+
+### Glass buildings
+
+The same script can render a fill-extrusion layer as refracting glass (WebGL): it copies the map drawn so far into a texture and draws the buildings with refraction, frosting, a tint and bright rounded edges. Enable it in the style:
+
+```json
+"metadata": {
+  "mapstyler:glass": {
+    "layer": "building-3d", "tint": "#dff4ff", "tintStrength": 0.12,
+    "refraction": 16, "blur": 1.5, "bevel": 2.5,
+    "rim": "#ffffff", "rimStrength": 0.9, "specular": 0.9
+  }
+}
+```
+
+The extrusion layer stays in the style as a fallback: without the script, maps show it as usual. Pass `{ glass: false }` to `attach` to turn the effect off. Mercator projection only.
 
 Routes are stored as a GeoJSON source `mapstyler-route` with the layers `route-casing`, `route-line`, `route-arrows`, `route-points` and `route-labels`; the route settings live in `metadata["mapstyler:route"]`.
 

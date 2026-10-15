@@ -157,8 +157,6 @@ export const EN: Record<string, string> = {
   // Templates
   'Vorlage „{name}“ geladen': 'Template “{name}” loaded',
   'Vorlage konnte nicht geladen werden: {message}': 'Could not load template: {message}',
-  'Fertige Kartendesigns mit passenden Tooltips und Beispielroute. Danach lässt sich alles unter Ebenen, Farben, Routen und Tooltips anpassen.':
-    'Ready-made map designs with matching tooltips and a sample route. Afterwards you can tweak everything under Layers, Colors, Routes and Tooltips.',
   Minimal: 'Minimal',
   Glas: 'Glass',
   'Liquid Glass': 'Liquid Glass',

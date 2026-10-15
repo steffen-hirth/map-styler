@@ -63,10 +63,7 @@ export function TemplatesPanel() {
 
   return (
     <PanelBody>
-      <p className="px-3 pt-1 pb-3 text-[10px] leading-relaxed text-subtle">
-        {t('Fertige Kartendesigns mit passenden Tooltips und Beispielroute. Danach lässt sich alles unter Ebenen, Farben, Routen und Tooltips anpassen.')}
-      </p>
-      <div className="grid grid-cols-2 gap-2 px-3 pb-4">
+      <div className="grid grid-cols-2 gap-2 px-3 pt-1 pb-4">
         {TEMPLATES.map((template) => (
           <TemplateCard
             key={template.id}

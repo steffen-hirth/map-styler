@@ -3,10 +3,12 @@
 // map design and its tooltips. Built separately into cdn/ for embedding.
 
 import type { MapGeoJSONFeature, MapLayerMouseEvent, Map as MapLibreMap, MapMouseEvent, MapStyleImageMissingEvent, Popup, PopupOptions } from 'maplibre-gl';
+import { attachGlass } from '../glass';
 import { kindLabel } from './kind-labels';
 import { BOX_PREFIX, drawBoxImage, drawPatternImage, drawPinImage, PATTERN_PREFIX, PIN_IMAGE_PREFIX } from './pin-icons';
 
 export { PIN_TYPES, drawPinImage } from './pin-icons';
+export { GLASS_KEY, DEFAULT_GLASS, attachGlass } from '../glass';
 
 export const KEY = 'mapstyler:tooltips';
 
@@ -243,6 +245,8 @@ export type AttachOptions = {
   config?: unknown;
   /** MapLibre namespace when it is not available as window.maplibregl. */
   maplibregl?: { Popup: PopupCtor };
+  /** Render metadata["mapstyler:glass"] buildings (default true). */
+  glass?: boolean;
 };
 
 export type TooltipHandle = {
@@ -373,6 +377,8 @@ export function attach(map: MapLibreMap, options: AttachOptions = {}): TooltipHa
   };
   map.on('styledata', onStyleData);
 
+  const glass = options.glass === false ? null : attachGlass(map);
+
   map.on('mousemove', onMove);
   map.on('click', onClick);
   map.on('mouseout', onLeave as (e: MapLayerMouseEvent) => void);
@@ -397,6 +403,7 @@ export function attach(map: MapLibreMap, options: AttachOptions = {}): TooltipHa
       map.off('style.load', onStyleLoad);
       map.off('styleimagemissing', onImageMissing);
       map.off('styledata', onStyleData);
+      glass?.destroy();
       popup?.remove();
       styleEl.remove();
     },
