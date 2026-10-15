@@ -1,6 +1,7 @@
 // Product definition: base styles, defaults and option lists the panels render.
 
 import { getLang } from '../i18n';
+import { storageKey } from '../stage';
 import { KEY as TOOLTIP_KEY, normalize as normalizeTooltips, type TooltipShadow } from '../runtime/tooltips';
 import type { LabelLanguage } from '../runtime/style/style-utils';
 import type { Style } from '../runtime/style/types';
@@ -10,8 +11,8 @@ export const APP_NAME = 'Map Styler';
 /** Keep in sync with the maplibre-gl pin in package.json (used in embed snippets). */
 export const MAPLIBRE_VERSION = '5.24.0';
 
-export const STORAGE_KEY = 'mapstyler:project:v1';
-export const EXPORT_PREFS_KEY = 'mapstyler:export:v1';
+export const STORAGE_KEY = storageKey('project:v1');
+export const EXPORT_PREFS_KEY = storageKey('export:v1');
 
 export type BaseStyle = { id: string; label: string; url: string };
 

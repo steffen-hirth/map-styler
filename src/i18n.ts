@@ -2,10 +2,11 @@
 // below. English is the default; the choice is remembered per browser.
 
 import { useSyncExternalStore } from 'react';
+import { storageKey } from './stage';
 
 export type Lang = 'en' | 'de';
 
-const STORAGE_KEY = 'mapstyler:lang';
+const STORAGE_KEY = storageKey('lang');
 const listeners = new Set<() => void>();
 
 function readLang(): Lang {

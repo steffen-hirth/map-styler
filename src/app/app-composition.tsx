@@ -11,6 +11,7 @@ import { cn } from '../ui/lib/utils';
 import { SegmentedControl } from '../ui/controls/controls';
 import { Button } from '../ui/primitives/button';
 import { Panel, PanelHeader, PanelTabs } from '../ui/panel/panel';
+import { STAGE } from '../stage';
 import { APP_NAME } from './app-schema';
 import { ExportDialog } from './export-dialog';
 import { BasicsPanel } from './panels/basics-panel';
@@ -118,7 +119,16 @@ function LeftPanel({ className }: { className?: string }) {
   return (
     <Panel className={className}>
       <PanelHeader
-        title={APP_NAME}
+        title={
+          STAGE === 'staging' ? (
+            <span className="flex items-center gap-1.5">
+              {APP_NAME}
+              <span className="rounded bg-glow/20 px-1.5 py-px text-[9px] font-semibold tracking-wide text-[#8a4f35]">STAGING</span>
+            </span>
+          ) : (
+            APP_NAME
+          )
+        }
         icon={
           <span className="brand-gradient flex size-5 items-center justify-center rounded-md text-[#f2efe8] shadow-sm">
             <MapIcon className="size-3" />

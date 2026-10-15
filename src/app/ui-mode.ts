@@ -3,10 +3,11 @@
 
 import { useSyncExternalStore } from 'react';
 import { store, type Tab } from '../runtime/state/store';
+import { storageKey } from '../stage';
 
 export type UiMode = 'simple' | 'expert';
 
-const STORAGE_KEY = 'mapstyler:mode';
+const STORAGE_KEY = storageKey('mode');
 const listeners = new Set<() => void>();
 
 export const SIMPLE_TABS: Tab[] = ['templates', 'palette', 'route', 'tooltips'];
