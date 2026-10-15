@@ -1,36 +1,78 @@
 name: Deploy to GitHub Pages
 
+# main is served at the site root, the staging branch (if present) under
+# /staging/. Only main may deploy to Pages, so a push to staging just
+# re-runs this workflow on main, which then builds both.
+
 on:
   push:
-    branches: [main]
+    branches: [main, staging]
   workflow_dispatch:
 
 permissions:
   contents: read
   pages: write
   id-token: write
+  actions: write
 
 concurrency:
-  group: pages
+  group: pages-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  relay:
+    if: github.ref == 'refs/heads/staging'
+    runs-on: ubuntu-latest
+    steps:
+      - run: gh workflow run pages.yml --ref main --repo "${{ github.repository }}"
+        env:
+          GH_TOKEN: ${{ github.token }}
+
   build:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
+          path: main
+      - name: Detect staging branch
+        id: staging
+        run: |
+          if git ls-remote --exit-code --heads "https://github.com/${{ github.repository }}.git" staging >/dev/null; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/checkout@v4
+        if: steps.staging.outputs.exists == 'true'
+        with:
+          ref: staging
+          path: staging
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-      - run: npm ci
-      - run: npm test
-      - run: npm run build
+      - name: Build main
+        working-directory: main
+        run: npm ci && npm test && npm run build
+      - name: Build staging
+        if: steps.staging.outputs.exists == 'true'
+        working-directory: staging
+        env:
+          VITE_STAGE: staging
+        run: npm ci && npm test && npm run build
+      - name: Assemble site
+        run: |
+          mkdir site
+          cp -R main/dist/. site/
+          if [ -d staging/dist ]; then
+            mkdir site/staging
+            cp -R staging/dist/. site/staging/
+          fi
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: site
 
   deploy:
+    if: github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-latest
     environment:
