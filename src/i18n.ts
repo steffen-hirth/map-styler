@@ -159,6 +159,8 @@ export const EN: Record<string, string> = {
   'Fertige Kartendesigns mit passenden Tooltips und Beispielroute. Danach lässt sich alles unter Ebenen, Farben, Routen und Tooltips anpassen.':
     'Ready-made map designs with matching tooltips and a sample route. Afterwards you can tweak everything under Layers, Colors, Routes and Tooltips.',
   Minimal: 'Minimal',
+  'Baral Sand': 'Baral Sand',
+  'Helles Grau ohne Beschriftung, Punkte und Akzente in Sand.': 'Light grey without labels, markers and accents in sand.',
   'Helles Grau, weiße Straßen – nichts lenkt von deiner Route ab.': 'Light grey, white roads – nothing distracts from your route.',
   Dämmerung: 'Dusk',
   'Dunkel und ruhig, mit warmem Pfirsich-Akzent.': 'Dark and calm, with a warm peach accent.',

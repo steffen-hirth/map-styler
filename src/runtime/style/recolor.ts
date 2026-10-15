@@ -7,8 +7,13 @@ import { groupOf, type GroupId } from './spec';
 import { mapPaintColors, setLayerProp } from './style-utils';
 import type { Style } from './types';
 
-/** [color for the darkest input, color for the lightest input] */
-export type Ramp = [string, string];
+/**
+ * [color for the darkest input, color for the lightest input] and an optional
+ * lightness window [lo, hi]: inputs at or below lo get the dark color, at or
+ * above hi the light one. A narrow window turns subtle differences (e.g. yellow
+ * main roads vs. white side streets) into clear contrast.
+ */
+export type Ramp = [string, string] | [string, string, number, number];
 
 export type LabelColors = { text: string; halo: string; haloWidth?: number };
 
@@ -31,8 +36,10 @@ export function rampColor(input: string, ramp: Ramp): string {
   const dark = parseColor(ramp[0]);
   const light = parseColor(ramp[1]);
   if (!c || !dark || !light) return input;
+  const [, , lo = 0, hi = 1] = ramp;
   const { l } = rgbToHsl(c.r, c.g, c.b);
-  const out = mix(dark, light, l);
+  const t = hi > lo ? Math.min(1, Math.max(0, (l - lo) / (hi - lo))) : l;
+  const out = mix(dark, light, t);
   return formatColor({ ...out, a: c.a });
 }
 

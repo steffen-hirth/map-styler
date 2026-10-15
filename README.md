@@ -6,7 +6,7 @@ Runs entirely in the browser. No account, no API key, no tracking. UI in English
 
 ## Features
 
-- **Templates** – nine ready-made map designs, each with matching tooltips and a styled sample route: Minimal (default), Dusk, Paper, Outdoor, Standard, Bright, Dataviz Light, Dataviz Dark and Blueprint. Everything stays editable afterwards.
+- **Templates** – ten ready-made map designs, each with matching tooltips and a styled sample route: Baral Sand, Minimal (default), Dusk, Paper, Outdoor, Standard, Bright, Dataviz Light, Dataviz Dark and Blueprint. Everything stays editable afterwards.
 - **Routes** – load a GPX or GeoJSON file or use the sample route. Set color, width, opacity, line style (solid, dashed, dotted), direction arrows, casing, start/finish/waypoint markers and their labels. The route is exported with the `style.json`.
 - **Layer editor** – all layers grouped (water, roads, buildings, labels, POIs, routes …). Show/hide, reorder, duplicate, rename and delete.
 - **Every property in detail** – a fitting control for each paint and layout property (color with opacity, sliders, selects, switches, fonts).

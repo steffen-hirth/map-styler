@@ -28,12 +28,62 @@ export type Template = {
   trigger?: TooltipTrigger;
   tooltip?: Partial<TooltipStyle>;
   route?: Partial<RouteConfig>;
+  /** Tooltip templates for the route layers, if the defaults do not fit. */
+  routeTooltips?: { line?: string; points?: string };
 };
 
 const INTER = '"Inter Variable", "Inter", system-ui, sans-serif';
 const MONO = 'ui-monospace, "SF Mono", Menlo, monospace';
 
 export const TEMPLATES: Template[] = [
+  {
+    id: 'baral-sand',
+    name: 'Baral Sand',
+    description: 'Helles Grau ohne Beschriftung, Punkte und Akzente in Sand.',
+    base: 'liberty',
+    preview: { colors: ['#f4f4f4', '#ebebeb', '#dedede', '#d9cbb0'], route: '#a68b5b' },
+    language: 'de',
+    recipe: {
+      ramps: {
+        background: ['#f1f1f1', '#f4f4f4'],
+        landuse: ['#e3e3e3', '#ebebeb'],
+        water: ['#dcdcdc', '#e3e3e3'],
+        // Main roads (yellow/orange in the base) turn grey, side streets stay white.
+        roads: ['#d9d9d9', '#ffffff', 0.86, 0.97],
+        transit: ['#d4d4d4', '#e0e0e0'],
+        buildings: ['#e6e6e6', '#ebebeb'],
+        other: ['#ececec', '#f1f1f1'],
+      },
+      hide: ['labels', 'poi', 'boundaries'],
+    },
+    tooltip: {
+      background: '#ffffff',
+      color: '#1a1a1a',
+      fontFamily: INTER,
+      fontSize: 13,
+      lineHeight: 1.55,
+      padding: 14,
+      radius: 8,
+      borderWidth: 0,
+      shadow: 'soft',
+      tip: false,
+      maxWidth: 300,
+    },
+    route: {
+      color: '#a68b5b',
+      width: 3,
+      casingColor: '#ffffff',
+      casingWidth: 1,
+      arrows: false,
+      pointColor: '#a68b5b',
+      pointStroke: '#ffffff',
+      pointRadius: 8,
+      labels: false,
+    },
+    routeTooltips: {
+      points: '<strong>{name}</strong>\n{label}\n<span style="color:#a68b5b">{url|website}</span>',
+    },
+  },
   {
     id: 'minimal',
     name: 'Minimal',
@@ -328,6 +378,10 @@ export async function buildTemplate(template: Template): Promise<Style> {
   style = withDefaultTooltips({ ...style, name: t(template.name) });
   style = applyRoute(style, { ...DEFAULT_ROUTE, ...template.route }, sampleRoute());
   style = withRouteTooltips(style);
+  const tooltipsBase = normalizeTooltips(style.metadata?.[TOOLTIP_KEY]);
+  if (template.routeTooltips?.line) tooltipsBase.layers['route-line'] = { enabled: true, template: template.routeTooltips.line };
+  if (template.routeTooltips?.points) tooltipsBase.layers['route-points'] = { enabled: true, template: template.routeTooltips.points };
+  style = { ...style, metadata: { ...(style.metadata ?? {}), [TOOLTIP_KEY]: tooltipsBase } };
 
   const tooltips = normalizeTooltips(style.metadata?.[TOOLTIP_KEY]);
   tooltips.style = { ...tooltips.style, ...template.tooltip };

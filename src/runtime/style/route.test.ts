@@ -21,6 +21,12 @@ describe('recolor', () => {
     expect(rampColor('rgba(255, 255, 255, 0.5)', ['#000000', '#ff0000'])).toBe('rgba(255, 0, 0, 0.5)');
   });
 
+  it('stretches contrast within a lightness window', () => {
+    // Yellow main road (l ≈ 0.77) falls below the window, white stays white.
+    expect(rampColor('#ffcc88', ['#d6d6d6', '#ffffff', 0.85, 0.97])).toBe('#d6d6d6');
+    expect(rampColor('#ffffff', ['#d6d6d6', '#ffffff', 0.85, 0.97])).toBe('#ffffff');
+  });
+
   it('applies ramps, label colors and hidden groups', () => {
     const style = applyRecipe(base(), {
       ramps: { background: ['#111111', '#222222'], water: ['#0000ff', '#00ffff'] },
