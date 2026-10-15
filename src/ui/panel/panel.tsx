@@ -19,12 +19,15 @@ export function Panel({ className, ...props }: ComponentProps<'div'>) {
   );
 }
 
-export function PanelHeader({ title, icon, children }: { title: ReactNode; icon?: ReactNode; children?: ReactNode }) {
+export function PanelHeader({ title, subtitle, icon, children }: { title: ReactNode; subtitle?: ReactNode; icon?: ReactNode; children?: ReactNode }) {
   return (
     <div className="flex h-12 shrink-0 items-center justify-between gap-2 pr-2 pl-4">
       <div className="flex min-w-0 items-center gap-2">
         {icon}
-        <p className="m-0 min-w-0 truncate text-xs-plus font-semibold tracking-[-0.01em]">{title}</p>
+        <div className="flex min-w-0 flex-col">
+          <p className="m-0 min-w-0 truncate text-xs-plus leading-tight font-semibold tracking-[-0.01em]">{title}</p>
+          {subtitle ? <p className="m-0 min-w-0 truncate text-[9px] leading-tight text-subtle">{subtitle}</p> : null}
+        </div>
       </div>
       {children ? <div className="flex shrink-0 items-center gap-0.5">{children}</div> : null}
     </div>

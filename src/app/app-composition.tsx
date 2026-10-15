@@ -132,6 +132,14 @@ function LeftPanel({ className }: { className?: string }) {
             APP_NAME
           )
         }
+        subtitle={
+          <>
+            by{' '}
+            <a href="https://steffen-hirth.de" target="_blank" rel="noopener noreferrer" className="text-muted underline-offset-2 hover:text-foreground hover:underline">
+              Steffen Hirth
+            </a>
+          </>
+        }
         icon={
           <span className="brand-gradient flex size-5 items-center justify-center rounded-md text-[#f2efe8] shadow-sm">
             <MapIcon className="size-3" />
