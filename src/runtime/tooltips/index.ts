@@ -156,7 +156,11 @@ export function tooltipCss(style: TooltipStyle, className: string): string {
       `font-size:${Number(style.fontSize)}px;line-height:${Number(style.lineHeight)};padding:${Number(style.padding)}px;` +
       `border-radius:${Number(style.radius)}px;border:${Number(style.borderWidth)}px solid ${cssValue(style.borderColor)};` +
       `box-shadow:${SHADOWS[style.shadow] ?? SHADOWS.soft};}`,
-    `${sel} .maplibregl-popup-close-button{color:inherit;font-size:16px;padding:0 6px;}`,
+    // Click tooltips get a close button; keep it clear of the text.
+    `${sel} .maplibregl-popup-close-button{top:6px;right:6px;width:20px;height:20px;padding:0;border-radius:6px;` +
+      `color:inherit;opacity:.55;font-size:16px;line-height:18px;background:transparent;}`,
+    `${sel} .maplibregl-popup-close-button:hover{opacity:1;background:rgba(127,127,127,.18);}`,
+    `${sel}.msx-click .maplibregl-popup-content{padding-right:${Number(style.padding) + 24}px;}`,
     tip(['top', 'top-left', 'top-right'], 'bottom'),
     tip(['bottom', 'bottom-left', 'bottom-right'], 'top'),
     tip(['left'], 'right'),
@@ -251,7 +255,7 @@ export function attach(map: MapLibreMap, options: AttachOptions = {}): TooltipHa
     styleEl.textContent = tooltipCss(cfg.style, className);
     popup?.remove();
     popup = new lib.Popup({
-      className: `msx-tooltip ${className}`,
+      className: `msx-tooltip ${className}${cfg.trigger === 'click' ? ' msx-click' : ''}`,
       closeButton: cfg.trigger === 'click',
       closeOnClick: false,
       maxWidth: `${cfg.style.maxWidth}px`,

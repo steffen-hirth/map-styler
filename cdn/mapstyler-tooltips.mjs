@@ -118,7 +118,9 @@ function p(e, t) {
 	let r = `.${t}`, i = f(e.background), a = (e, t) => e.map((e) => `${r}.maplibregl-popup-anchor-${e} .maplibregl-popup-tip`).join(",") + `{border-${t}-color:${i};}`;
 	return [
 		`${r} .maplibregl-popup-content{background:${i};color:${f(e.color)};font-family:${f(e.fontFamily)};font-size:${Number(e.fontSize)}px;line-height:${Number(e.lineHeight)};padding:${Number(e.padding)}px;border-radius:${Number(e.radius)}px;border:${Number(e.borderWidth)}px solid ${f(e.borderColor)};box-shadow:${n[e.shadow] ?? n.soft};}`,
-		`${r} .maplibregl-popup-close-button{color:inherit;font-size:16px;padding:0 6px;}`,
+		`${r} .maplibregl-popup-close-button{top:6px;right:6px;width:20px;height:20px;padding:0;border-radius:6px;color:inherit;opacity:.55;font-size:16px;line-height:18px;background:transparent;}`,
+		`${r} .maplibregl-popup-close-button:hover{opacity:1;background:rgba(127,127,127,.18);}`,
+		`${r}.msx-click .maplibregl-popup-content{padding-right:${Number(e.padding) + 24}px;}`,
 		a([
 			"top",
 			"top-left",
@@ -163,7 +165,7 @@ function h(e, t = {}) {
 		c && (e.getCanvas().style.cursor = "", o?.trigger === "hover" && h());
 	}, b = (e) => {
 		o = r(e), a.textContent = p(o.style, i), s?.remove(), s = new n.Popup({
-			className: `msx-tooltip ${i}`,
+			className: `msx-tooltip ${i}${o.trigger === "click" ? " msx-click" : ""}`,
 			closeButton: o.trigger === "click",
 			closeOnClick: !1,
 			maxWidth: `${o.style.maxWidth}px`,

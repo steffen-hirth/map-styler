@@ -99,9 +99,19 @@ function TooltipPreview() {
   return (
     <div className="flex min-h-28 items-center justify-center rounded-lg bg-[repeating-linear-gradient(45deg,rgba(29,30,34,0.035)_0_8px,transparent_8px_16px)] px-3 py-5">
       <style>{tooltipCss(config.style, PREVIEW_CLASS)}</style>
-      <div className={`maplibregl-popup maplibregl-popup-anchor-bottom tt-preview ${PREVIEW_CLASS}`} style={{ maxWidth: config.style.maxWidth }}>
+      <div
+        className={`maplibregl-popup maplibregl-popup-anchor-bottom tt-preview ${PREVIEW_CLASS}${config.trigger === 'click' ? ' msx-click' : ''}`}
+        style={{ maxWidth: config.style.maxWidth }}
+      >
         <div className="maplibregl-popup-tip" />
-        <div className="maplibregl-popup-content" dangerouslySetInnerHTML={{ __html: html }} />
+        <div className="maplibregl-popup-content">
+          <div dangerouslySetInnerHTML={{ __html: html }} />
+          {config.trigger === 'click' ? (
+            <span className="maplibregl-popup-close-button grid place-items-center" aria-hidden>
+              ×
+            </span>
+          ) : null}
+        </div>
       </div>
     </div>
   );
