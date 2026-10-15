@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { t } from '../../i18n';
 import { store, useAppState } from '../../runtime/state/store';
-import { adjustStyleColors, applyHalo, applyLabelLanguage, scaleTextSize, type LabelLanguage } from '../../runtime/style/style-utils';
+import { adjustStyleColors, applyHalo, applyLabelLanguage, removeItalic, scaleTextSize, type LabelLanguage } from '../../runtime/style/style-utils';
 import type { Style } from '../../runtime/style/types';
 import { ColorControl } from '../../ui/controls/color-control';
 import { CommitInput, Field, SelectControl, SliderControl, SwitchControl } from '../../ui/controls/controls';
@@ -130,6 +130,19 @@ function LabelsSection() {
       <Button className="self-end" onClick={() => store.edit((s) => applyHalo(s, haloColor, haloWidth))}>
         {t('Halo anwenden')}
       </Button>
+      <Field label={t('Schriftschnitt')}>
+        <Button
+          className="self-start"
+          onClick={() => {
+            const { style, count } = removeItalic(store.getState().style);
+            if (!count) return toast(t('Keine kursiven Beschriftungen gefunden.'));
+            store.edit(() => style);
+            toast.success(t('{n} Ebenen auf normale Schrift umgestellt', { n: count }));
+          }}
+        >
+          {t('Kursive Schrift entfernen')}
+        </Button>
+      </Field>
     </PanelSection>
   );
 }

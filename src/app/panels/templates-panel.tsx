@@ -1,5 +1,5 @@
-import { Check, Loader2 } from 'lucide-react';
-import { useState } from 'react';
+import { Check, Link2, Loader2, Upload } from 'lucide-react';
+import { useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { t } from '../../i18n';
 import { mapHolder } from '../../runtime/map/map-holder';
@@ -7,7 +7,10 @@ import { store, useAppState } from '../../runtime/state/store';
 import { routeBounds, sampleRoute } from '../../runtime/style/route';
 import { cn } from '../../ui/lib/utils';
 import { confirmDialog } from '../../ui/dialog/dialog-host';
+import { Button } from '../../ui/primitives/button';
 import { PanelBody } from '../../ui/panel/panel';
+import { BASE_STYLES } from '../app-schema';
+import { importStyleFile, loadBaseStyle } from '../style-sources';
 import { buildTemplate, TEMPLATE_KEY, TEMPLATES, type Template } from '../templates';
 
 export function fitToRoute(bounds = routeBounds(sampleRoute())) {
@@ -24,6 +27,7 @@ export function fitToRoute(bounds = routeBounds(sampleRoute())) {
 export function TemplatesPanel() {
   const active = useAppState((s) => s.style.metadata?.[TEMPLATE_KEY] as string | undefined);
   const [loading, setLoading] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const apply = async (template: Template) => {
     if (loading) return;
@@ -64,6 +68,40 @@ export function TemplatesPanel() {
           />
         ))}
       </div>
+      <section className="flex flex-col gap-2.5 border-t border-ink/[0.06] px-4 pt-4 pb-5">
+        <div className="flex flex-col gap-1">
+          <p className="m-0 text-xs font-medium">{t('Anderer Startpunkt')}</p>
+          <p className="m-0 text-[10px] leading-relaxed text-subtle">
+            {t('Original-Styles von OpenFreeMap, eine eigene Style-URL oder eine gespeicherte style.json.')}
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          {BASE_STYLES.map((base) => (
+            <Button key={base.id} size="sm" onClick={() => void loadBaseStyle(base.id)}>
+              {base.label.replace('OpenFreeMap ', '')}
+            </Button>
+          ))}
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          <Button size="sm" onClick={() => void loadBaseStyle('url')}>
+            <Link2 /> {t('Eigene URL')}
+          </Button>
+          <Button size="sm" onClick={() => fileRef.current?.click()}>
+            <Upload /> {t('JSON importieren')}
+          </Button>
+        </div>
+        <input
+          ref={fileRef}
+          type="file"
+          accept=".json,application/json"
+          hidden
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            e.target.value = '';
+            if (file) void importStyleFile(file);
+          }}
+        />
+      </section>
     </PanelBody>
   );
 }

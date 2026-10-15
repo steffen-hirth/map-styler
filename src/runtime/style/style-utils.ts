@@ -360,3 +360,20 @@ export function replaceColor(style: Style, refs: ColorRef[], fromKey: string, to
     }),
   };
 }
+
+/** Swap italic font faces for regular ones (OpenFreeMap sets water names in italic). */
+export function removeItalic(style: Style): { style: Style; count: number } {
+  let count = 0;
+  const swap = (value: unknown): unknown => {
+    if (typeof value === 'string') return value.replace(/ Italic$/, ' Regular');
+    if (Array.isArray(value)) return value.map(swap);
+    return value;
+  };
+  const layers = style.layers.map((layer) => {
+    const font = layer.layout?.['text-font'];
+    if (font === undefined || !/Italic/.test(JSON.stringify(font))) return layer;
+    count++;
+    return { ...layer, layout: { ...layer.layout, 'text-font': swap(font) } };
+  });
+  return { style: count ? { ...style, layers } : style, count };
+}

@@ -2,8 +2,10 @@
 // segmented choices. All value controls report (value, live) so drags can
 // preview without flooding the undo history.
 
+import NumberFlow from '@number-flow/react';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { Input, NativeSelect, Textarea } from '../primitives/input';
+import { getLang } from '../../i18n';
+import { Input, inputSurface, NativeSelect, Textarea } from '../primitives/input';
 import { Slider } from '../primitives/slider';
 import { Switch } from '../primitives/switch';
 import { cn } from '../lib/utils';
@@ -174,11 +176,69 @@ export function SliderControl({
         }}
         onValueCommitted={(v) => onChange(v, false)}
       />
-      <div className="relative w-[58px] shrink-0">
-        <NumberInput value={local} step={step} label={label} onCommit={(v) => onChange(v, false)} className={unit ? 'pr-5' : undefined} />
-        {unit ? <span className="pointer-events-none absolute top-1/2 right-1.5 -translate-y-1/2 text-2xs text-subtle">{unit}</span> : null}
-      </div>
+      <AnimatedNumberField value={local} step={step} unit={unit} label={label} onCommit={(v) => onChange(v, false)} />
     </div>
+  );
+}
+
+const decimalsFor = (step: number) => (step >= 1 ? 0 : Math.min(3, String(step).split('.')[1]?.length ?? 2));
+
+/**
+ * Value readout whose digits roll to the new number; click to type a value.
+ */
+export function AnimatedNumberField({
+  value,
+  step = 1,
+  unit,
+  label,
+  onCommit,
+}: {
+  value: number;
+  step?: number;
+  unit?: string;
+  label?: string;
+  onCommit: (value: number) => void;
+}) {
+  const [editing, setEditing] = useState(false);
+  const decimals = decimalsFor(step);
+
+  if (editing) {
+    const finish = (raw: string) => {
+      setEditing(false);
+      const n = parseFloat(raw.replace(',', '.'));
+      if (!Number.isNaN(n) && n !== value) onCommit(decimals ? Math.round(n / step) * step : n);
+    };
+    return (
+      <Input
+        autoFocus
+        defaultValue={formatNumber(value)}
+        aria-label={label}
+        className="w-[64px] shrink-0 text-right tabular-nums"
+        onFocus={(e) => e.target.select()}
+        onBlur={(e) => finish(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
+          if (e.key === 'Escape') setEditing(false);
+        }}
+      />
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      title={label}
+      onClick={() => setEditing(true)}
+      className={cn(inputSurface, 'flex h-8 w-[64px] shrink-0 cursor-text items-center justify-end gap-0.5 px-2 tabular-nums')}
+    >
+      <NumberFlow
+        value={value}
+        locales={getLang() === 'de' ? 'de-DE' : 'en-US'}
+        format={{ minimumFractionDigits: 0, maximumFractionDigits: decimals }}
+      />
+      {unit ? <span className="text-2xs text-subtle">{unit}</span> : null}
+    </button>
   );
 }
 

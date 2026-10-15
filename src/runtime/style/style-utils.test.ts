@@ -3,6 +3,7 @@ import { adjustColor, colorKey, parseColor } from './color';
 import { PROPS } from './spec';
 import {
   applyLabelLanguage,
+  removeItalic,
   collectColorPaths,
   collectPalette,
   readStops,
@@ -69,6 +70,18 @@ describe('expressions', () => {
     const paths = collectColorPaths(value);
     expect(paths.map((p) => p.label)).toEqual(['park', 'wood, forest', 'sonst']);
     expect(setAt(value, paths[0].path, '#123456')).toEqual(['match', ['get', 'class'], 'park', '#123456', ['wood', 'forest'], '#008800', '#ffffff']);
+  });
+});
+
+describe('fonts', () => {
+  it('replaces italic faces, also inside expressions', () => {
+    const s = style();
+    s.layers[1].layout = { 'text-font': ['Noto Sans Italic'] };
+    s.layers[2].layout = { ...s.layers[2].layout, 'text-font': ['literal', ['Noto Sans Italic', 'Noto Sans Regular']] };
+    const { style: next, count } = removeItalic(s);
+    expect(count).toBe(2);
+    expect(next.layers[1].layout?.['text-font']).toEqual(['Noto Sans Regular']);
+    expect(next.layers[2].layout?.['text-font']).toEqual(['literal', ['Noto Sans Regular', 'Noto Sans Regular']]);
   });
 });
 

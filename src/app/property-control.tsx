@@ -29,7 +29,7 @@ import {
   SliderControl,
   type OnValue,
 } from '../ui/controls/controls';
-import { cn } from '../ui/lib/utils';
+import { cn, swatchBackground } from '../ui/lib/utils';
 import { Button, IconButton } from '../ui/primitives/button';
 import { NativeSelect } from '../ui/primitives/input';
 import { Switch } from '../ui/primitives/switch';
@@ -68,11 +68,13 @@ export function LayerSwatch({ layer, className }: { layer: Layer; className?: st
     );
   }
   return (
-    <span className={cn('checkerboard relative size-4 shrink-0 overflow-hidden rounded-[4px] border border-ink/[0.12]', className)}>
-      <span
-        className={cn('absolute inset-0', layer.type === 'line' && 'inset-x-0 top-1/2 bottom-auto h-[3px] -translate-y-1/2')}
-        style={{ background: color ?? 'transparent' }}
-      />
+    <span
+      className={cn('relative size-4 shrink-0 overflow-hidden rounded-[4px] shadow-[inset_0_0_0_1px_rgba(31,35,40,0.12)]', className)}
+      style={{ background: layer.type === 'line' ? '#ffffff' : swatchBackground(color) }}
+    >
+      {layer.type === 'line' ? (
+        <span className="absolute inset-x-0 top-1/2 h-[3px] -translate-y-1/2" style={{ background: color ?? 'transparent' }} />
+      ) : null}
     </span>
   );
 }

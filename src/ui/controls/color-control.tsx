@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { RgbaColorPicker } from 'react-colorful';
 import { t } from '../../i18n';
 import { formatColor, parseColor } from '../../runtime/style/color';
+import { swatchBackground } from '../lib/utils';
 import { CommitInput, type OnValue } from './controls';
 
 /**
@@ -35,10 +36,9 @@ export function ColorControl({ value, onChange, label }: { value: string | undef
       >
         <Popover.Trigger
           aria-label={label ? t('{label} wählen', { label }) : t('Farbe wählen')}
-          className="checkerboard relative size-7 shrink-0 cursor-pointer overflow-hidden rounded-md border border-ink/[0.12] outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
-        >
-          <span className="absolute inset-0" style={{ background: display }} />
-        </Popover.Trigger>
+          className="size-8 shrink-0 cursor-pointer rounded-lg bg-clip-padding shadow-[inset_0_0_0_1px_rgba(31,35,40,0.12)] outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+          style={{ background: swatchBackground(display) }}
+        />
         <Popover.Portal>
           <Popover.Positioner side="bottom" align="start" sideOffset={6} collisionPadding={12} className="z-50">
             <Popover.Popup className="color-popover rounded-xl border border-ink/[0.1] bg-popover/95 p-2.5 shadow-[0_16px_40px_-12px_rgba(40,32,48,0.35)] backdrop-blur-2xl outline-none">

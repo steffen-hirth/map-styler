@@ -6,7 +6,7 @@ import { getLang, t } from '../i18n';
 import { fetchStyle } from '../runtime/state/store';
 import { applyRecipe, type Recipe } from '../runtime/style/recolor';
 import { applyRoute, DEFAULT_ROUTE, sampleRoute, type RouteConfig } from '../runtime/style/route';
-import { applyLabelLanguage, type LabelLanguage } from '../runtime/style/style-utils';
+import { applyLabelLanguage, removeItalic, type LabelLanguage } from '../runtime/style/style-utils';
 import type { Style } from '../runtime/style/types';
 import { KEY as TOOLTIP_KEY, normalize as normalizeTooltips, type TooltipStyle, type TooltipTrigger } from '../runtime/tooltips';
 import { BASE_STYLES, withDefaultTooltips } from './app-schema';
@@ -31,7 +31,6 @@ export type Template = {
 };
 
 const INTER = '"Inter Variable", "Inter", system-ui, sans-serif';
-const SERIF = 'Georgia, "Times New Roman", serif';
 const MONO = 'ui-monospace, "SF Mono", Menlo, monospace';
 
 export const TEMPLATES: Template[] = [
@@ -75,7 +74,7 @@ export const TEMPLATES: Template[] = [
   {
     id: 'paper',
     name: 'Papier',
-    description: 'Warmes Papier, gedämpfte Töne, Serifen-Tooltips.',
+    description: 'Warmes Papier, gedämpfte Töne, ruhige Tooltips.',
     base: 'positron',
     preview: { colors: ['#f3efe8', '#e7e3d6', '#c9d3dc', '#c08a72'], route: '#6e5770' },
     language: 'de',
@@ -94,8 +93,7 @@ export const TEMPLATES: Template[] = [
     tooltip: {
       background: '#fbf9f6',
       color: '#2a2730',
-      fontFamily: SERIF,
-      fontSize: 14,
+      fontFamily: INTER,
       radius: 4,
       borderColor: 'rgba(59, 53, 66, 0.15)',
       shadow: 'soft',
@@ -282,6 +280,8 @@ export function withRouteTooltips(style: Style): Style {
 export async function buildTemplate(template: Template): Promise<Style> {
   let style = await loadBase(template.base);
   if (template.recipe) style = applyRecipe(style, template.recipe);
+  // One upright typeface reads calmer than the italic water names of the base styles.
+  style = removeItalic(style).style;
   // Map labels follow the UI language.
   if (template.language) style = applyLabelLanguage(style, getLang()).style;
   style = withDefaultTooltips({ ...style, name: t(template.name) });
