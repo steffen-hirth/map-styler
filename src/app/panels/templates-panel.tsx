@@ -130,12 +130,16 @@ function TemplateCard({ template, active, loading, onSelect }: { template: Templ
           background: `radial-gradient(70% 70% at 72% 18%, ${glow}cc 0%, transparent 70%), linear-gradient(172deg, ${c0} 0%, ${c1} 48%, ${c2} 100%)`,
         }}
       >
-        <svg viewBox="0 0 100 60" className="absolute inset-0 size-full" aria-hidden>
-          <path d="M8 50 C 22 42, 28 22, 46 27 S 70 46, 92 12" fill="none" stroke="rgba(255,255,255,0.55)" strokeWidth="5" strokeLinecap="round" />
-          <path d="M8 50 C 22 42, 28 22, 46 27 S 70 46, 92 12" fill="none" stroke={template.preview.route} strokeWidth="2.4" strokeLinecap="round" />
-          <circle cx="8" cy="50" r="3" fill="#fff" stroke={template.preview.route} strokeWidth="1.5" />
-          <circle cx="92" cy="12" r="3" fill="#fff" stroke={template.preview.route} strokeWidth="1.5" />
-        </svg>
+        {/* Rendered map thumbnails (src/dev/render-previews.ts); the gradient shows while loading. */}
+        <img
+          src={`${import.meta.env.BASE_URL}previews/${template.id}.webp`}
+          alt=""
+          loading="lazy"
+          draggable={false}
+          className="absolute inset-0 size-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
+          onError={(e) => (e.currentTarget.style.display = 'none')}
+        />
+        <span className="absolute inset-0 rounded-md ring-1 ring-ink/[0.06] ring-inset" />
         {active ? (
           <span className="absolute top-1.5 right-1.5 flex size-4 items-center justify-center rounded-full bg-accent text-white">
             <Check className="size-2.5" />

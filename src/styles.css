@@ -52,6 +52,30 @@
     overflow: hidden;
   }
 
+  /* Tailwind 4 keeps the arrow cursor on buttons; show the hand on anything clickable. */
+  button:not(:disabled),
+  [role='button']:not([aria-disabled='true']),
+  [role='tab'],
+  [role='radio'],
+  [role='switch'],
+  [role='option'],
+  [role='menuitem'],
+  a[href],
+  select,
+  summary,
+  label:has(input[type='checkbox']),
+  input[type='color'] {
+    cursor: pointer;
+  }
+
+  :disabled {
+    cursor: not-allowed;
+  }
+
+  [role='slider'] {
+    cursor: grab;
+  }
+
   body {
     background: var(--color-background);
     color: var(--color-foreground);
@@ -136,4 +160,34 @@
   position: relative;
   transform: none !important;
   pointer-events: none;
+}
+
+/* Soft fade where a scroll container cuts content off (see ui/lib/scroll-fade.ts). */
+@property --fade-top {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+
+@property --fade-bottom {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+
+.scroll-fade {
+  --fade-top: 0px;
+  --fade-bottom: 0px;
+  mask-image: linear-gradient(to bottom, transparent 0, #000 var(--fade-top), #000 calc(100% - var(--fade-bottom)), transparent 100%);
+  transition:
+    --fade-top 200ms ease-out,
+    --fade-bottom 200ms ease-out;
+}
+
+.scroll-fade[data-fade-top] {
+  --fade-top: 28px;
+}
+
+.scroll-fade[data-fade-bottom] {
+  --fade-bottom: 28px;
 }

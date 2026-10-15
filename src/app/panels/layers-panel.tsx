@@ -1,5 +1,6 @@
 import { ChevronRight, Eye, EyeOff, ListTree, MessageSquareText, Rows3, Search } from 'lucide-react';
 import { memo, useMemo, useState } from 'react';
+import { useScrollFade } from '../../ui/lib/scroll-fade';
 import { store, useAppState } from '../../runtime/state/store';
 import { t } from '../../i18n';
 import { GROUPS, groupLabel, groupOf, type GroupId } from '../../runtime/style/spec';
@@ -12,6 +13,7 @@ import { Input } from '../../ui/primitives/input';
 import { LayerSwatch } from '../property-control';
 
 export function LayersPanel() {
+  const fade = useScrollFade<HTMLDivElement>();
   const layers = useAppState((s) => s.style.layers);
   const selectedId = useAppState((s) => s.selectedId);
   const tooltipLayers = useAppState((s) => (s.style.metadata?.[TOOLTIP_KEY] as TooltipConfig | undefined)?.layers);
@@ -41,7 +43,7 @@ export function LayersPanel() {
           {grouped ? <Rows3 /> : <ListTree />}
         </IconButton>
       </div>
-      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-1.5 pb-2">
+      <div ref={fade} className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-1.5 pb-2">
         {!visible.length ? <p className="px-2 py-6 text-center text-2xs text-muted">{t('Keine Ebene gefunden.')}</p> : null}
         {grouped
           ? GROUPS.map(([id]) => {

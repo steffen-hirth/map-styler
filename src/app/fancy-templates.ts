@@ -4,6 +4,7 @@
 import { groupOf } from '../runtime/style/spec';
 import { setLayerProp } from '../runtime/style/style-utils';
 import { GLASS_KEY, type GlassConfig } from '../runtime/glass';
+import { HATCH_KEY } from '../runtime/hatch';
 import type { Layer, Style } from '../runtime/style/types';
 import { boxImageId, patternImageId, type PatternChar } from '../runtime/tooltips/pin-icons';
 import type { Template } from './templates';
@@ -173,10 +174,12 @@ const widthByRank = (rank: number, low: number[], high: number[]) => ['interpola
 const isStreetName = (layer: Layer) => layer.id.startsWith('highway-name');
 const isShield = (layer: Layer) => /ref/.test(JSON.stringify(layer.layout?.['text-field'] ?? ''));
 
-const IL = { paper: '#e4e2db', hatch: '#e0604f', ink: '#23243a', water: '#b9cdd6', green: '#d5dccb' };
+const IL = { paper: '#e4e2db', hatch: '#e0604f', ink: '#23243a', water: '#b9cdd6', green: '#d5dccb', road: '#a3a3a0', minor: '#bdbcb7' };
 
 /** Print illustration: red hatched blocks, paper streets, spaced ink capitals. */
-function illustration(style: Style): Style {
+function illustration(input: Style): Style {
+  // Fine hatching drawn by the tooltip script; the pattern is the fallback.
+  const style = { ...input, metadata: { ...input.metadata, [HATCH_KEY]: { layer: 'background', paper: IL.paper, color: IL.hatch, spacing: 5, width: 0.9, angle: 45 } } };
   return eachLayer(style, (layer) => {
     const group = groupOf(layer);
     // The land between the streets is the hatched "block"; streets cut it as paper.
@@ -198,7 +201,7 @@ function illustration(style: Style): Style {
       return {
         ...layer,
         layout: { ...layer.layout, 'line-cap': 'round', 'line-join': 'round' },
-        paint: { 'line-color': IL.paper, 'line-width': widthByRank(rank, [0.8, 1.6, 2.6, 3.6], [7, 14, 22, 30]) },
+        paint: { 'line-color': rank >= 2 ? IL.road : IL.minor, 'line-width': widthByRank(rank, [0.8, 1.6, 2.6, 3.6], [7, 14, 22, 30]) },
       };
     }
     if (layer.type === 'symbol') {

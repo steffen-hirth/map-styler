@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from 'react';
+import { useScrollFade } from '../../ui/lib/scroll-fade';
 import { store, useAppState } from '../../runtime/state/store';
 import { colorKey } from '../../runtime/style/color';
 import { t } from '../../i18n';
@@ -9,6 +10,7 @@ import { NativeSelect } from '../../ui/primitives/input';
 import { cn } from '../../ui/lib/utils';
 
 export function PalettePanel() {
+  const fade = useScrollFade<HTMLUListElement>();
   // The committed style keeps the list stable while a color is being dragged.
   const committed = useAppState((s) => s.committed);
   const [group, setGroup] = useState<GroupId | ''>('');
@@ -31,7 +33,7 @@ export function PalettePanel() {
             : t('{n} Farben. Eine Änderung ersetzt die Farbe überall, wo sie vorkommt.', { n: entries.length })}
         </p>
       </div>
-      <ul className="m-0 min-h-0 flex-1 list-none overflow-y-auto overscroll-contain border-t border-ink/[0.06] p-0">
+      <ul ref={fade} className="m-0 min-h-0 flex-1 list-none overflow-y-auto overscroll-contain border-t border-ink/[0.06] p-0">
         {entries.map((entry) => (
           <PaletteRow key={entry.key} entry={entry} />
         ))}

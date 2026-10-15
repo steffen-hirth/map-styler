@@ -9,6 +9,7 @@ import { store, useAppState, type Tab } from '../runtime/state/store';
 import { DialogHost } from '../ui/dialog/dialog-host';
 import { cn } from '../ui/lib/utils';
 import { SegmentedControl } from '../ui/controls/controls';
+import { SlidingPill } from '../ui/lib/sliding-pill';
 import { Button } from '../ui/primitives/button';
 import { Panel, PanelHeader, PanelTabs } from '../ui/panel/panel';
 import { STAGE } from '../stage';
@@ -76,16 +77,18 @@ function useShortcuts() {
 function LangSwitch() {
   const lang = useLang();
   return (
-    <div role="group" aria-label="Language" className="flex h-6 items-center rounded-md bg-well p-0.5 text-[10px] font-semibold ring-1 ring-ink/[0.05] ring-inset">
+    <div role="group" aria-label="Language" className="relative flex h-6 items-center rounded-md bg-well p-0.5 text-[10px] font-semibold ring-1 ring-ink/[0.05] ring-inset">
+      <SlidingPill activeKey={lang} className="rounded-[4px] shadow-[0_1px_2px_rgba(40,32,48,0.12)]" />
       {(['en', 'de'] as const).map((value) => (
         <button
           key={value}
           type="button"
+          data-active={lang === value}
           aria-pressed={lang === value}
           onClick={() => setLang(value)}
           className={cn(
-            'h-5 rounded-[4px] px-1.5 uppercase text-subtle transition-colors hover:text-foreground',
-            lang === value && 'bg-popover text-foreground shadow-[0_1px_2px_rgba(40,32,48,0.12)]',
+            'relative h-5 rounded-[4px] px-1.5 uppercase text-subtle transition-colors duration-200 hover:text-foreground',
+            lang === value && 'text-foreground',
           )}
         >
           {value}

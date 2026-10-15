@@ -8,6 +8,7 @@ import { getLang } from '../../i18n';
 import { Input, inputSurface, NativeSelect, Textarea } from '../primitives/input';
 import { Slider } from '../primitives/slider';
 import { Switch } from '../primitives/switch';
+import { SlidingPill } from '../lib/sliding-pill';
 import { cn } from '../lib/utils';
 
 export type OnValue<T> = (value: T, live: boolean) => void;
@@ -254,18 +255,20 @@ export function SegmentedControl<T extends string>({
   className?: string;
 }) {
   return (
-    <div role="radiogroup" className={cn('flex h-8 w-full rounded-lg bg-well p-0.5 ring-1 ring-ink/[0.05] ring-inset', className)}>
+    <div role="radiogroup" className={cn('relative flex h-8 w-full rounded-lg bg-well p-0.5 ring-1 ring-ink/[0.05] ring-inset', className)}>
+      <SlidingPill activeKey={value} />
       {options.map((option) => (
         <button
           key={option.value}
           type="button"
           role="radio"
+          data-active={option.value === value}
           aria-checked={option.value === value}
           title={option.title}
           onClick={() => onChange(option.value)}
           className={cn(
-            'flex min-w-0 flex-1 items-center justify-center gap-1 truncate rounded-md px-1.5 text-2xs font-medium text-muted transition-colors hover:text-foreground [&_svg]:size-3.5',
-            option.value === value && 'bg-popover text-foreground shadow-[0_1px_2px_rgba(31,35,40,0.08),0_0_0_1px_rgba(31,35,40,0.06)]',
+            'relative flex min-w-0 flex-1 items-center justify-center gap-1 truncate rounded-md px-1.5 text-2xs font-medium text-muted transition-colors duration-200 hover:text-foreground [&_svg]:size-3.5',
+            option.value === value && 'text-foreground',
           )}
         >
           {option.label}

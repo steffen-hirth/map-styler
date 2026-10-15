@@ -2,7 +2,9 @@
 // compact headers and collapsible sections separated by hairlines.
 
 import { ChevronRight } from 'lucide-react';
-import { useState, type ComponentProps, type ReactNode } from 'react';
+import { useCallback, useState, type ComponentProps, type ReactNode } from 'react';
+import { useScrollFade } from '../lib/scroll-fade';
+import { SlidingPill } from '../lib/sliding-pill';
 import { cn } from '../lib/utils';
 
 export function Panel({ className, ...props }: ComponentProps<'div'>) {
@@ -29,8 +31,17 @@ export function PanelHeader({ title, icon, children }: { title: ReactNode; icon?
   );
 }
 
-export function PanelBody({ className, ...props }: ComponentProps<'div'>) {
-  return <div className={cn('min-h-0 flex-1 overflow-y-auto overscroll-contain', className)} {...props} />;
+export function PanelBody({ className, ref, ...props }: ComponentProps<'div'>) {
+  const fade = useScrollFade<HTMLDivElement>();
+  const setRef = useCallback(
+    (el: HTMLDivElement | null) => {
+      fade(el);
+      if (typeof ref === 'function') ref(el);
+      else if (ref) ref.current = el;
+    },
+    [fade, ref],
+  );
+  return <div ref={setRef} className={cn('min-h-0 flex-1 overflow-y-auto overscroll-contain', className)} {...props} />;
 }
 
 export function PanelSection({
@@ -93,7 +104,8 @@ export function PanelTabs<T extends string>({
 }) {
   // With icons, only the active tab shows its label so many tabs fit.
   return (
-    <div role="tablist" className="mx-3 mb-3 flex shrink-0 gap-0.5 rounded-lg bg-well p-0.5 ring-1 ring-ink/[0.05] ring-inset">
+    <div role="tablist" className="relative mx-3 mb-3 flex shrink-0 gap-0.5 rounded-lg bg-well p-0.5 ring-1 ring-ink/[0.05] ring-inset">
+      <SlidingPill activeKey={value} />
       {items.map((item) => {
         const active = item.value === value;
         return (
@@ -101,14 +113,15 @@ export function PanelTabs<T extends string>({
             key={item.value}
             type="button"
             role="tab"
+            data-active={active}
             aria-selected={active}
             aria-label={item.label}
             title={item.label}
             onClick={() => onChange(item.value)}
             className={cn(
-              'flex h-8 min-w-0 items-center justify-center gap-1.5 rounded-md px-1.5 text-2xs font-medium text-muted outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-accent/50 [&_svg]:size-4 [&_svg]:shrink-0',
+              'relative flex h-8 min-w-0 items-center justify-center gap-1.5 rounded-md px-1.5 text-2xs font-medium text-muted outline-none transition-colors duration-200 hover:text-foreground focus-visible:ring-2 focus-visible:ring-accent/50 [&_svg]:size-4 [&_svg]:shrink-0',
               !item.icon && 'flex-1',
-              active && 'bg-popover text-foreground shadow-[0_1px_2px_rgba(31,35,40,0.08),0_0_0_1px_rgba(31,35,40,0.06)]',
+              active && 'text-foreground',
               item.icon && (active ? 'flex-1' : 'w-8 flex-none'),
             )}
           >

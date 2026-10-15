@@ -3,12 +3,14 @@ import { store, useAppState } from '../../runtime/state/store';
 import { t } from '../../i18n';
 import { groupLabel, groupOf } from '../../runtime/style/spec';
 import { IconButton } from '../../ui/primitives/button';
+import { useScrollFade } from '../../ui/lib/scroll-fade';
 import { Panel, PanelHeader } from '../../ui/panel/panel';
 import { cn } from '../../ui/lib/utils';
 import { defaultTemplate } from '../app-schema';
 import { LayerSwatch } from '../property-control';
 
 export function InspectorCard({ className }: { className?: string }) {
+  const fade = useScrollFade<HTMLDivElement>();
   const inspect = useAppState((s) => s.inspect);
   const inspected = useAppState((s) => s.inspected);
   const layers = useAppState((s) => s.style.layers);
@@ -21,7 +23,7 @@ export function InspectorCard({ className }: { className?: string }) {
           <X />
         </IconButton>
       </PanelHeader>
-      <div className="min-h-0 flex-1 overflow-y-auto border-t border-ink/[0.06] px-2 py-2">
+      <div ref={fade} className="min-h-0 flex-1 overflow-y-auto border-t border-ink/[0.06] px-2 py-2">
         {!inspected ? (
           <p className="px-1 py-2 text-2xs text-muted">{t('Klick auf die Karte, um zu sehen, welche Ebenen dort zeichnen.')}</p>
         ) : !inspected.length ? (

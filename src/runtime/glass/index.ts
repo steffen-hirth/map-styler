@@ -280,6 +280,12 @@ const hexToRgb = (hex: string): [number, number, number] => {
 
 // Layer ---------------------------------------------------------------------------
 
+/** Unbind MapLibre's vertex array object so our attribute setup cannot change it. */
+function unbindVertexArray(gl: WebGLRenderingContext) {
+  if ('bindVertexArray' in gl) (gl as unknown as WebGL2RenderingContext).bindVertexArray(null);
+  else gl.getExtension('OES_vertex_array_object')?.bindVertexArrayOES(null);
+}
+
 type Uniforms = Record<string, WebGLUniformLocation | null>;
 
 function createGlassLayer(map: MapLibreMap, getConfig: () => GlassConfig, getMinzoom: () => number) {
@@ -366,6 +372,7 @@ function createGlassLayer(map: MapLibreMap, getConfig: () => GlassConfig, getMin
     render(context, options: CustomRenderMethodInput) {
       const g = context as WebGLRenderingContext;
       if (!program || !buffer || !texture) return;
+      unbindVertexArray(g);
       if (pending) {
         g.bindBuffer(g.ARRAY_BUFFER, buffer);
         g.bufferData(g.ARRAY_BUFFER, pending, g.STATIC_DRAW);
@@ -427,6 +434,9 @@ function createGlassLayer(map: MapLibreMap, getConfig: () => GlassConfig, getMin
       bind('a_side', 4, 9);
 
       // Depth pre-pass so only the nearest glass surface is shaded.
+      // Never touch MapLibre's stencil tile masks.
+      g.disable(g.STENCIL_TEST);
+      g.stencilMask(0);
       g.disable(g.BLEND);
       g.disable(g.CULL_FACE);
       g.enable(g.DEPTH_TEST);
@@ -438,6 +448,7 @@ function createGlassLayer(map: MapLibreMap, getConfig: () => GlassConfig, getMin
       g.depthMask(false);
       g.drawArrays(g.TRIANGLES, 0, count);
       g.depthMask(true);
+      g.stencilMask(0xff);
       for (const name of Object.keys(attribs)) if (attribs[name] >= 0) g.disableVertexAttribArray(attribs[name]);
     },
   };

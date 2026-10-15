@@ -4,11 +4,13 @@
 
 import type { MapGeoJSONFeature, MapLayerMouseEvent, Map as MapLibreMap, MapMouseEvent, MapStyleImageMissingEvent, Popup, PopupOptions } from 'maplibre-gl';
 import { attachGlass } from '../glass';
+import { attachHatch } from '../hatch';
 import { kindLabel } from './kind-labels';
 import { BOX_PREFIX, drawBoxImage, drawPatternImage, drawPinImage, PATTERN_PREFIX, PIN_IMAGE_PREFIX } from './pin-icons';
 
 export { PIN_TYPES, drawPinImage } from './pin-icons';
 export { GLASS_KEY, DEFAULT_GLASS, attachGlass } from '../glass';
+export { HATCH_KEY, DEFAULT_HATCH, attachHatch } from '../hatch';
 
 export const KEY = 'mapstyler:tooltips';
 
@@ -247,6 +249,8 @@ export type AttachOptions = {
   maplibregl?: { Popup: PopupCtor };
   /** Render metadata["mapstyler:glass"] buildings (default true). */
   glass?: boolean;
+  /** Render metadata["mapstyler:hatch"] backgrounds (default true). */
+  hatch?: boolean;
 };
 
 export type TooltipHandle = {
@@ -378,6 +382,7 @@ export function attach(map: MapLibreMap, options: AttachOptions = {}): TooltipHa
   map.on('styledata', onStyleData);
 
   const glass = options.glass === false ? null : attachGlass(map);
+  const hatch = options.hatch === false ? null : attachHatch(map);
 
   map.on('mousemove', onMove);
   map.on('click', onClick);
@@ -404,6 +409,7 @@ export function attach(map: MapLibreMap, options: AttachOptions = {}): TooltipHa
       map.off('styleimagemissing', onImageMissing);
       map.off('styledata', onStyleData);
       glass?.destroy();
+      hatch?.destroy();
       popup?.remove();
       styleEl.remove();
     },
