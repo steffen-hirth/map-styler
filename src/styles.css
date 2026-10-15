@@ -1,0 +1,149 @@
+@import "tailwindcss";
+@import "@fontsource-variable/inter";
+/* Layered so Tailwind utilities (e.g. absolute inset-0 on the map container) win. */
+@import "maplibre-gl/dist/maplibre-gl.css" layer(base);
+
+/*
+ * Light UI in a dusk palette: warm paper surfaces, ink text, plum accent,
+ * peach glow and slate blue for inspection.
+ */
+@theme {
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", "SF Mono", Menlo, Consolas, monospace;
+  --text-2xs: 0.75rem;
+  --text-2xs--line-height: 1rem;
+  --text-xs: 0.8125rem;
+  --text-xs--line-height: 1.25rem;
+  --text-xs-plus: 0.9375rem;
+  --text-xs-plus--line-height: 1.375rem;
+
+  --color-background: #f6f6f7;
+  --color-foreground: #1f2328;
+  --color-ink: #1f2328;
+  --color-muted: #5f6470;
+  --color-subtle: #9095a0;
+  --color-popover: #ffffff;
+  --color-well: #f7f7f8;
+  --color-accent: #5b5bd6;
+  --color-primary: #1f2328;
+  --color-glow: #c08a72;
+  --color-inspect: #4f6a8f;
+  --color-destructive: #c2453a;
+}
+
+:root {
+  color-scheme: light;
+  --brand-gradient:
+    radial-gradient(120% 90% at 48% 0%, rgb(192 138 114 / 0.95) 0%, transparent 60%),
+    radial-gradient(80% 120% at 0% 100%, rgb(110 127 128 / 0.9) 0%, transparent 55%),
+    linear-gradient(180deg, #4b4a5c 0%, #6e6178 38%, #3a2f36 68%, #1b2433 100%);
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html,
+  body,
+  #root {
+    margin: 0;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  body {
+    background: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    font-optical-sizing: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklab, var(--color-ink) 16%, transparent) transparent;
+}
+
+.brand-gradient {
+  background: var(--brand-gradient);
+}
+
+.checkerboard {
+  background-color: #fff;
+  background-image:
+    linear-gradient(45deg, #d9d6d2 25%, transparent 25%),
+    linear-gradient(-45deg, #d9d6d2 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #d9d6d2 75%),
+    linear-gradient(-45deg, transparent 75%, #d9d6d2 75%);
+  background-size: 8px 8px;
+  background-position: 0 0, 0 4px, 4px -4px, -4px 0;
+}
+
+/* react-colorful, sized for the popover */
+.color-popover .react-colorful {
+  width: 208px;
+  height: 196px;
+  gap: 8px;
+}
+.color-popover .react-colorful__saturation {
+  border-radius: 8px;
+  border-bottom: 0;
+}
+.color-popover .react-colorful__hue,
+.color-popover .react-colorful__alpha {
+  height: 10px;
+  border-radius: 999px;
+}
+.color-popover .react-colorful__pointer {
+  width: 14px;
+  height: 14px;
+  border-width: 2px;
+}
+
+/* MapLibre chrome matching the floating panels */
+.maplibregl-ctrl-group {
+  background: color-mix(in oklab, var(--color-popover) 88%, transparent) !important;
+  backdrop-filter: blur(24px);
+  border: 1px solid rgb(29 30 34 / 0.08);
+  box-shadow: 0 8px 24px -12px rgb(40 32 48 / 0.18) !important;
+  border-radius: 10px !important;
+}
+.maplibregl-ctrl-group button + button {
+  border-top-color: rgb(29 30 34 / 0.08) !important;
+}
+.maplibregl-ctrl-scale {
+  background: color-mix(in oklab, var(--color-popover) 80%, transparent);
+  color: var(--color-muted);
+  border-color: var(--color-muted);
+  font-size: 10px;
+}
+.maplibregl-ctrl-attrib {
+  font-size: 10px;
+}
+
+@media (min-width: 768px) {
+  .maplibregl-ctrl-top-right,
+  .maplibregl-ctrl-bottom-right {
+    right: 352px;
+  }
+  .maplibregl-ctrl-top-right {
+    top: 2px;
+  }
+}
+
+/* Static tooltip preview reuses MapLibre's popup classes */
+.tt-preview.maplibregl-popup {
+  position: relative;
+  transform: none !important;
+  pointer-events: none;
+}

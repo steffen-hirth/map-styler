@@ -1,0 +1,38 @@
+{
+  "name": "map-styler",
+  "version": "0.1.0",
+  "description": "Free style editor for OpenFreeMap and OpenStreetMap vector maps, with templates, routes, a tooltip designer and CDN export.",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "npm run build:cdn && npm run typecheck && vite build",
+    "build:cdn": "vite build --config vite.cdn.config.ts",
+    "preview": "vite preview",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@base-ui/react": "^1.4.1",
+    "@fontsource-variable/inter": "^5.2.8",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.511.0",
+    "maplibre-gl": "5.24.0",
+    "react": "^19.2.0",
+    "react-colorful": "^5.6.1",
+    "react-dom": "^19.2.0",
+    "sonner": "^2.0.7",
+    "tailwind-merge": "^3.5.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.18",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "tailwindcss": "^4.1.18",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.0",
+    "vitest": "4.1.11"
+  }
+}
