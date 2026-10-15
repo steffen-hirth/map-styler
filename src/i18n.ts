@@ -273,8 +273,8 @@ export const EN: Record<string, string> = {
   'Tooltip für diese Ebene': 'Tooltip for this layer',
   Vorlage: 'Template',
   'Tooltip-Vorlage': 'Tooltip template',
-  '{feld} fügt einen Wert ein, {name:de|name} nimmt den ersten vorhandenen. Leere Zeilen fallen weg.':
-    '{field} inserts a value, {name:en|name} takes the first one present. Empty lines are dropped.',
+  '{feld} fügt einen Wert ein, {name:de|name} nimmt den ersten vorhandenen, {kind_de} die Art (z. B. Park). Leere Zeilen fallen weg.':
+    '{field} inserts a value, {name:en|name} takes the first one present, {kind_en} the type (e.g. Park). Empty lines are dropped.',
   'Felder in dieser Ansicht': 'Fields in this view',
   'Beispiel: {value}': 'Example: {value}',
   'Zoom näher heran, damit Daten dieser Ebene geladen werden.': 'Zoom in closer so data for this layer loads.',

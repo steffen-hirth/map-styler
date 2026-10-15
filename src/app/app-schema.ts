@@ -25,7 +25,7 @@ export const BASE_STYLES: BaseStyle[] = [
 export const DEFAULT_VIEW = { center: [9.1829, 48.7758] as [number, number], zoom: 12.5 };
 
 /** Default tooltip template; prefers names in the current UI language. */
-export const defaultTemplate = () => `<strong>{name:${getLang()}|name}</strong>\n<span style="opacity:.7">{subclass|class}</span>`;
+export const defaultTemplate = () => `<strong>{name:${getLang()}|name}</strong>\n<span style="opacity:.7">{kind_${getLang()}}</span>`;
 
 export const SAMPLE_PROPS: Record<string, unknown> = {
   name: 'Gasthaus Krone',

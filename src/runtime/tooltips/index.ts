@@ -3,6 +3,7 @@
 // map design and its tooltips. Built separately into cdn/ for embedding.
 
 import type { MapGeoJSONFeature, MapLayerMouseEvent, Map as MapLibreMap, MapMouseEvent, MapStyleImageMissingEvent, Popup, PopupOptions } from 'maplibre-gl';
+import { kindLabel } from './kind-labels';
 import { BOX_PREFIX, drawBoxImage, drawPatternImage, drawPinImage, PATTERN_PREFIX, PIN_IMAGE_PREFIX } from './pin-icons';
 
 export { PIN_TYPES, drawPinImage } from './pin-icons';
@@ -72,7 +73,7 @@ export function normalize(input: unknown): TooltipConfig {
   if (cfg.layers && typeof cfg.layers === 'object') {
     for (const [id, layer] of Object.entries(cfg.layers)) {
       const l = (layer ?? {}) as Partial<TooltipLayer>;
-      layers[id] = { enabled: l.enabled !== false, template: typeof l.template === 'string' ? l.template : '' };
+      layers[id] = { enabled: l.enabled !== false, template: typeof l.template === 'string' ? upgradeTemplate(l.template) : '' };
     }
   }
   return { trigger: cfg.trigger === 'click' ? 'click' : 'hover', style: style as TooltipStyle, layers };
@@ -81,12 +82,27 @@ export function normalize(input: unknown): TooltipConfig {
 const ESCAPES: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
 const escapeHtml = (value: unknown) => String(value).replace(/[&<>"']/g, (c) => ESCAPES[c]);
 
+/**
+ * Older default templates showed the raw OpenMapTiles key ("bus_stop") under
+ * the name; switch them to the readable {kind_xx} field in the name's language.
+ */
+function upgradeTemplate(template: string): string {
+  const lang = /\{name:(de|en)\|/.exec(template)?.[1] ?? 'en';
+  return template.replace('{subclass|class}', `{kind_${lang}}`);
+}
+
 function lookup(expr: string, props: Record<string, unknown>): string {
   for (const raw of expr.split('|')) {
     const key = raw.trim();
     if (!key) continue;
     const quote = key[0];
     if ((quote === "'" || quote === '"') && key.length >= 2 && key.endsWith(quote)) return key.slice(1, -1);
+    const kind = /^kind(?:_(de|en))?$/.exec(key);
+    if (kind) {
+      const label = kindLabel(props.subclass || props.class, kind[1] ?? 'en');
+      if (label) return label;
+      continue;
+    }
     const value = props[key];
     if (value !== undefined && value !== null && value !== '') return String(value);
   }
@@ -148,7 +164,7 @@ export function sanitize(html: string): string {
 
 /**
  * Render a template: {field}, alternatives {name:de|name}, literal fallbacks
- * {name|'Ohne Namen'}. Each line becomes a row; rows whose placeholders are all
+ * {name|'Ohne Namen'}, readable feature types {kind_de} / {kind_en}. Each line becomes a row; rows whose placeholders are all
  * empty are dropped. Values are escaped, markup is sanitized.
  */
 export function renderTemplate(template: string, props: Record<string, unknown> = {}): string {

@@ -27,36 +27,62 @@ type GlassOptions = {
   high: string;
   opacity: number;
   ground: string;
+  /** Soft glowing outline of the footprints, visible through the glass. */
+  edge: string;
   light: Record<string, unknown>;
   sky: Record<string, unknown>;
 };
 
-/** Translucent extrusions shaded by height, flat footprints underneath, plus sky and light. */
-function glass({ low, high, opacity, ground, light, sky }: GlassOptions) {
-  return (style: Style): Style => ({
-    ...eachLayer(style, (layer) => {
+const HEIGHT = ['coalesce', ['get', 'render_height'], 0];
+
+/**
+ * Glass buildings: clear, height-shaded extrusions that let the streets shine
+ * through, plus a glowing footprint outline.
+ */
+function glass({ low, high, opacity, ground, edge, light, sky }: GlassOptions) {
+  return (style: Style): Style => {
+    const layers: Layer[] = [];
+    for (const layer of style.layers) {
+      if (groupOf(layer) === 'overlay') {
+        layers.push(layer);
+        continue;
+      }
       if (layer.type === 'fill-extrusion') {
-        return {
+        // Footprint glow first, so it is seen through the glass.
+        layers.push({
+          id: `${layer.id}-glass-edge`,
+          type: 'line',
+          source: layer.source,
+          'source-layer': layer['source-layer'],
+          minzoom: 14,
+          layout: { 'line-join': 'round' },
+          paint: { 'line-color': edge, 'line-width': ['interpolate', ['linear'], ['zoom'], 14, 0.6, 18, 3], 'line-blur': 1, 'line-opacity': 0.9 },
+        });
+        layers.push({
           ...layer,
           minzoom: 13,
           paint: {
             ...layer.paint,
-            'fill-extrusion-color': ['interpolate', ['linear'], ['coalesce', ['get', 'render_height'], 0], 0, low, 90, high],
+            'fill-extrusion-color': ['interpolate', ['linear'], HEIGHT, 0, low, 90, high],
             'fill-extrusion-opacity': opacity,
             'fill-extrusion-vertical-gradient': true,
           },
-        };
+        });
+        continue;
       }
       if (layer.type === 'fill' && groupOf(layer) === 'buildings') {
-        return { ...layer, paint: { 'fill-color': ground, 'fill-outline-color': ground } };
+        layers.push({ ...layer, paint: { 'fill-color': ground, 'fill-outline-color': ground } });
+        continue;
       }
       // Road shields would break the calm 3D look.
-      if (layer.type === 'symbol' && /ref/.test(JSON.stringify(layer.layout?.['text-field'] ?? ''))) return hide(layer);
-      return layer;
-    }),
-    light,
-    sky,
-  });
+      if (layer.type === 'symbol' && /ref/.test(JSON.stringify(layer.layout?.['text-field'] ?? ''))) {
+        layers.push(hide(layer));
+        continue;
+      }
+      layers.push(layer);
+    }
+    return { ...style, layers, light, sky };
+  };
 }
 
 /** Streets as softly glowing cyan traces inside milky glass channels. */
@@ -270,7 +296,7 @@ function playMat(style: Style): Style {
           type: 'line',
           source: layer.source,
           'source-layer': layer['source-layer'],
-          filter: layer.filter,
+          ...(layer.filter ? { filter: layer.filter } : {}),
           minzoom: 14,
           layout: { 'line-cap': 'butt', 'line-join': 'round' },
           paint: { 'line-color': '#ffffff', 'line-width': ['interpolate', ['linear'], ['zoom'], 14, 0.6, 18, 2.4], 'line-dasharray': [3, 3] },
@@ -316,10 +342,11 @@ export const FANCY_TEMPLATES: Template[] = [
     extras: (style) =>
       circuitRoads(
         glass({
-          low: '#ffffff',
-          high: '#bfe9ff',
-          opacity: 0.45,
-          ground: '#e4edf3',
+          low: '#dff4ff',
+          high: '#8fdcff',
+          opacity: 0.28,
+          ground: '#e9f1f6',
+          edge: '#1fb4f0',
           light: { anchor: 'viewport', color: '#ffffff', intensity: 0.5, position: [1.4, 200, 35] },
           sky: {
             'sky-color': '#e3eef6',
@@ -379,10 +406,11 @@ export const FANCY_TEMPLATES: Template[] = [
       hide: ['poi'],
     },
     extras: glass({
-      low: '#eef7ff',
-      high: '#8fc2f2',
-      opacity: 0.62,
-      ground: '#dbe5ee',
+      low: '#f4faff',
+      high: '#a9d2f6',
+      opacity: 0.38,
+      ground: '#e2ebf3',
+      edge: '#8fc2f2',
       light: { anchor: 'viewport', color: '#ffffff', intensity: 0.45, position: [1.3, 210, 40] },
       sky: {
         'sky-color': '#cfe6fb',
@@ -428,8 +456,9 @@ export const FANCY_TEMPLATES: Template[] = [
     extras: glass({
       low: '#0f3b52',
       high: '#4fd8ff',
-      opacity: 0.72,
-      ground: '#0e1a2a',
+      opacity: 0.45,
+      ground: '#0c1726',
+      edge: '#4fd8ff',
       light: { anchor: 'viewport', color: '#9fe8ff', intensity: 0.6, position: [1.3, 210, 40] },
       sky: {
         'sky-color': '#05070d',

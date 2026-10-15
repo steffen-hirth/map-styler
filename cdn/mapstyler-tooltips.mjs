@@ -1,5 +1,172 @@
+//#region src/runtime/tooltips/kind-labels.ts
+var e = {
+	park: ["Park", "Park"],
+	garden: ["Garten", "Garden"],
+	playground: ["Spielplatz", "Playground"],
+	pitch: ["Sportplatz", "Sports pitch"],
+	sports_centre: ["Sportzentrum", "Sports centre"],
+	stadium: ["Stadion", "Stadium"],
+	swimming_pool: ["Schwimmbad", "Swimming pool"],
+	golf_course: ["Golfplatz", "Golf course"],
+	nature_reserve: ["Naturschutzgebiet", "Nature reserve"],
+	national_park: ["Nationalpark", "National park"],
+	protected_area: ["Schutzgebiet", "Protected area"],
+	wood: ["Wald", "Woods"],
+	forest: ["Wald", "Forest"],
+	grass: ["Wiese", "Grass"],
+	meadow: ["Wiese", "Meadow"],
+	farmland: ["Ackerland", "Farmland"],
+	vineyard: ["Weinberg", "Vineyard"],
+	orchard: ["Obstwiese", "Orchard"],
+	allotments: ["Kleingärten", "Allotments"],
+	cemetery: ["Friedhof", "Cemetery"],
+	grave_yard: ["Friedhof", "Graveyard"],
+	scrub: ["Gebüsch", "Scrub"],
+	rock: ["Fels", "Rock"],
+	sand: ["Sand", "Sand"],
+	beach: ["Strand", "Beach"],
+	wetland: ["Feuchtgebiet", "Wetland"],
+	residential: ["Wohngebiet", "Residential area"],
+	commercial: ["Gewerbegebiet", "Commercial area"],
+	industrial: ["Industriegebiet", "Industrial area"],
+	retail: ["Einkaufsgebiet", "Retail area"],
+	water: ["Gewässer", "Water"],
+	lake: ["See", "Lake"],
+	pond: ["Teich", "Pond"],
+	river: ["Fluss", "River"],
+	stream: ["Bach", "Stream"],
+	canal: ["Kanal", "Canal"],
+	reservoir: ["Stausee", "Reservoir"],
+	fountain: ["Brunnen", "Fountain"],
+	peak: ["Gipfel", "Peak"],
+	volcano: ["Vulkan", "Volcano"],
+	saddle: ["Sattel", "Saddle"],
+	viewpoint: ["Aussichtspunkt", "Viewpoint"],
+	city: ["Stadt", "City"],
+	town: ["Stadt", "Town"],
+	village: ["Dorf", "Village"],
+	hamlet: ["Weiler", "Hamlet"],
+	suburb: ["Stadtteil", "Suburb"],
+	quarter: ["Viertel", "Quarter"],
+	neighbourhood: ["Wohnviertel", "Neighbourhood"],
+	country: ["Land", "Country"],
+	state: ["Bundesland", "State"],
+	motorway: ["Autobahn", "Motorway"],
+	trunk: ["Schnellstraße", "Trunk road"],
+	primary: ["Hauptstraße", "Main road"],
+	secondary: ["Landstraße", "Secondary road"],
+	tertiary: ["Kreisstraße", "Tertiary road"],
+	minor: ["Straße", "Street"],
+	service: ["Zufahrt", "Service road"],
+	track: ["Feldweg", "Track"],
+	path: ["Weg", "Path"],
+	footway: ["Fußweg", "Footpath"],
+	cycleway: ["Radweg", "Cycleway"],
+	pedestrian: ["Fußgängerzone", "Pedestrian zone"],
+	steps: ["Treppe", "Steps"],
+	bridleway: ["Reitweg", "Bridleway"],
+	railway: ["Bahn", "Railway"],
+	rail: ["Bahnstrecke", "Railway"],
+	transit: ["Nahverkehr", "Transit"],
+	station: ["Bahnhof", "Station"],
+	halt: ["Haltepunkt", "Halt"],
+	subway: ["U-Bahn", "Subway"],
+	tram_stop: ["Straßenbahnhaltestelle", "Tram stop"],
+	bus: ["Bus", "Bus"],
+	bus_stop: ["Bushaltestelle", "Bus stop"],
+	bus_station: ["Busbahnhof", "Bus station"],
+	aerialway: ["Seilbahn", "Aerial lift"],
+	ferry_terminal: ["Fähranleger", "Ferry terminal"],
+	airport: ["Flughafen", "Airport"],
+	aerodrome: ["Flugplatz", "Airfield"],
+	parking: ["Parkplatz", "Parking"],
+	bicycle_parking: ["Fahrradparkplatz", "Bicycle parking"],
+	bicycle_rental: ["Fahrradverleih", "Bicycle rental"],
+	car_rental: ["Autovermietung", "Car rental"],
+	fuel: ["Tankstelle", "Fuel station"],
+	charging_station: ["Ladestation", "Charging station"],
+	restaurant: ["Restaurant", "Restaurant"],
+	cafe: ["Café", "Café"],
+	fast_food: ["Imbiss", "Fast food"],
+	bar: ["Bar", "Bar"],
+	pub: ["Kneipe", "Pub"],
+	biergarten: ["Biergarten", "Beer garden"],
+	beer: ["Biergarten", "Beer garden"],
+	ice_cream: ["Eisdiele", "Ice cream"],
+	bakery: ["Bäckerei", "Bakery"],
+	shop: ["Geschäft", "Shop"],
+	supermarket: ["Supermarkt", "Supermarket"],
+	grocery: ["Lebensmittel", "Grocery"],
+	convenience: ["Kiosk", "Convenience store"],
+	clothes: ["Bekleidung", "Clothes"],
+	books: ["Buchhandlung", "Bookshop"],
+	butcher: ["Metzgerei", "Butcher"],
+	florist: ["Blumenladen", "Florist"],
+	hairdresser: ["Friseur", "Hairdresser"],
+	pharmacy: ["Apotheke", "Pharmacy"],
+	chemist: ["Drogerie", "Chemist"],
+	mall: ["Einkaufszentrum", "Shopping mall"],
+	department_store: ["Kaufhaus", "Department store"],
+	marketplace: ["Markt", "Marketplace"],
+	museum: ["Museum", "Museum"],
+	theatre: ["Theater", "Theatre"],
+	cinema: ["Kino", "Cinema"],
+	library: ["Bibliothek", "Library"],
+	arts_centre: ["Kulturzentrum", "Arts centre"],
+	gallery: ["Galerie", "Gallery"],
+	attraction: ["Sehenswürdigkeit", "Attraction"],
+	artwork: ["Kunstwerk", "Artwork"],
+	monument: ["Denkmal", "Monument"],
+	memorial: ["Gedenkstätte", "Memorial"],
+	castle: ["Burg", "Castle"],
+	ruins: ["Ruine", "Ruins"],
+	zoo: ["Zoo", "Zoo"],
+	theme_park: ["Freizeitpark", "Theme park"],
+	picnic_site: ["Picknickplatz", "Picnic site"],
+	lodging: ["Unterkunft", "Lodging"],
+	hotel: ["Hotel", "Hotel"],
+	hostel: ["Hostel", "Hostel"],
+	guest_house: ["Pension", "Guest house"],
+	camp_site: ["Campingplatz", "Campsite"],
+	caravan_site: ["Wohnmobilstellplatz", "Caravan site"],
+	alpine_hut: ["Berghütte", "Mountain hut"],
+	wilderness_hut: ["Schutzhütte", "Shelter"],
+	shelter: ["Unterstand", "Shelter"],
+	school: ["Schule", "School"],
+	college: ["Hochschule", "College"],
+	university: ["Universität", "University"],
+	kindergarten: ["Kindergarten", "Kindergarten"],
+	hospital: ["Krankenhaus", "Hospital"],
+	clinic: ["Klinik", "Clinic"],
+	doctors: ["Arztpraxis", "Doctor"],
+	dentist: ["Zahnarzt", "Dentist"],
+	police: ["Polizei", "Police"],
+	fire_station: ["Feuerwehr", "Fire station"],
+	post: ["Post", "Post office"],
+	post_office: ["Post", "Post office"],
+	town_hall: ["Rathaus", "Town hall"],
+	townhall: ["Rathaus", "Town hall"],
+	bank: ["Bank", "Bank"],
+	atm: ["Geldautomat", "ATM"],
+	toilets: ["Toiletten", "Toilets"],
+	drinking_water: ["Trinkwasser", "Drinking water"],
+	information: ["Information", "Information"],
+	place_of_worship: ["Gotteshaus", "Place of worship"],
+	church: ["Kirche", "Church"],
+	mosque: ["Moschee", "Mosque"],
+	synagogue: ["Synagoge", "Synagogue"],
+	building: ["Gebäude", "Building"]
+};
+function t(t, n) {
+	if (typeof t != "string" || !t) return "";
+	let r = e[t.toLowerCase()];
+	if (r) return n === "de" ? r[0] : r[1];
+	let i = t.replace(/_/g, " ");
+	return i.charAt(0).toUpperCase() + i.slice(1);
+}
+//#endregion
 //#region src/runtime/tooltips/pin-icons.ts
-var e = [
+var n = [
 	"pin",
 	"star",
 	"cafe",
@@ -12,7 +179,7 @@ var e = [
 	"home",
 	"photo",
 	"hotel"
-], t = {
+], r = {
 	pin: ["M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0", "M9 10a3 3 0 1 0 6 0a3 3 0 1 0-6 0"],
 	star: ["M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"],
 	cafe: [
@@ -55,30 +222,30 @@ var e = [
 		"M2 18h20"
 	]
 };
-function n(t) {
-	return typeof t == "string" && e.includes(t);
-}
-var r = 56;
 function i(e) {
+	return typeof e == "string" && n.includes(e);
+}
+var a = 56;
+function o(e) {
 	if (!e.startsWith("msx-pin-") || typeof document > "u") return null;
-	let i = /^(.+)-([0-9a-f]{6})$/i.exec(e.slice(8));
-	if (!i) return null;
-	let a = n(i[1]) ? i[1] : "pin", o = document.createElement("canvas");
-	o.width = r, o.height = r;
+	let t = /^(.+)-([0-9a-f]{6})$/i.exec(e.slice(8));
+	if (!t) return null;
+	let n = i(t[1]) ? t[1] : "pin", o = document.createElement("canvas");
+	o.width = a, o.height = a;
 	let s = o.getContext("2d");
 	if (!s) return null;
-	let c = r / 2, l = r / 2 - 1;
-	s.shadowColor = "rgba(20, 22, 26, 0.28)", s.shadowBlur = 5, s.shadowOffsetY = 1.5, s.beginPath(), s.arc(c, l, 21, 0, Math.PI * 2), s.fillStyle = `#${i[2]}`, s.fill(), s.shadowColor = "transparent", s.lineWidth = 3, s.strokeStyle = "#ffffff", s.stroke();
+	let c = a / 2, l = a / 2 - 1;
+	s.shadowColor = "rgba(20, 22, 26, 0.28)", s.shadowBlur = 5, s.shadowOffsetY = 1.5, s.beginPath(), s.arc(c, l, 21, 0, Math.PI * 2), s.fillStyle = `#${t[2]}`, s.fill(), s.shadowColor = "transparent", s.lineWidth = 3, s.strokeStyle = "#ffffff", s.stroke();
 	let u = .92;
 	s.save(), s.translate(c - 12 * u, l - 12 * u), s.scale(u, u), s.strokeStyle = "#ffffff", s.lineWidth = 2.2, s.lineCap = "round", s.lineJoin = "round";
-	for (let e of t[a]) s.stroke(new Path2D(e));
+	for (let e of r[n]) s.stroke(new Path2D(e));
 	return s.restore(), {
-		width: r,
-		height: r,
-		data: s.getImageData(0, 0, r, r).data
+		width: a,
+		height: a,
+		data: s.getImageData(0, 0, a, a).data
 	};
 }
-var a = {
+var s = {
 	dot: "·",
 	tilde: "~",
 	hash: "#",
@@ -88,35 +255,35 @@ var a = {
 	dash: "-",
 	star: "*",
 	stripe: ""
-}, o = 28;
-function s(e) {
+}, c = 28;
+function l(e) {
 	if (!e.startsWith("msx-ascii-") || typeof document > "u") return null;
 	let t = /^([a-z]+)-([0-9a-f]{6})-([0-9a-f]{6})$/i.exec(e.slice(10));
-	if (!t || !(t[1] in a)) return null;
+	if (!t || !(t[1] in s)) return null;
 	let n = document.createElement("canvas");
-	n.width = o, n.height = o;
+	n.width = c, n.height = c;
 	let r = n.getContext("2d");
 	if (!r) return null;
-	if (r.fillStyle = `#${t[3]}`, r.fillRect(0, 0, o, o), t[1] === "stripe") {
+	if (r.fillStyle = `#${t[3]}`, r.fillRect(0, 0, c, c), t[1] === "stripe") {
 		r.strokeStyle = `#${t[2]}`, r.lineWidth = 5;
 		for (let e of [
 			-28,
 			0,
-			o
-		]) r.beginPath(), r.moveTo(e, o), r.lineTo(e + o, 0), r.stroke();
+			c
+		]) r.beginPath(), r.moveTo(e, c), r.lineTo(e + c, 0), r.stroke();
 		return {
-			width: o,
-			height: o,
-			data: r.getImageData(0, 0, o, o).data
+			width: c,
+			height: c,
+			data: r.getImageData(0, 0, c, c).data
 		};
 	}
-	return r.fillStyle = `#${t[2]}`, r.font = "600 20px ui-monospace, \"SF Mono\", Menlo, Consolas, monospace", r.textAlign = "center", r.textBaseline = "middle", r.fillText(a[t[1]], o / 2, 15), {
-		width: o,
-		height: o,
-		data: r.getImageData(0, 0, o, o).data
+	return r.fillStyle = `#${t[2]}`, r.font = "600 20px ui-monospace, \"SF Mono\", Menlo, Consolas, monospace", r.textAlign = "center", r.textBaseline = "middle", r.fillText(s[t[1]], c / 2, 15), {
+		width: c,
+		height: c,
+		data: r.getImageData(0, 0, c, c).data
 	};
 }
-function c(e) {
+function u(e) {
 	let t = /^([0-9a-f]{6})$/i.exec(e.slice(8));
 	if (!e.startsWith("msx-box-") || !t) return null;
 	let n = /* @__PURE__ */ new Uint8ClampedArray(1024), [r, i, a] = [
@@ -133,7 +300,7 @@ function c(e) {
 }
 //#endregion
 //#region src/runtime/tooltips/index.ts
-var l = "mapstyler:tooltips", u = {
+var d = "mapstyler:tooltips", f = {
 	background: "#ffffff",
 	color: "#1f2328",
 	fontFamily: "system-ui, -apple-system, \"Segoe UI\", sans-serif",
@@ -147,23 +314,23 @@ var l = "mapstyler:tooltips", u = {
 	maxWidth: 260,
 	tip: !0,
 	blur: 0
-}, d = {
+}, p = {
 	none: "none",
 	soft: "0 4px 14px rgba(0, 0, 0, 0.12)",
 	strong: "0 10px 30px rgba(0, 0, 0, 0.3)"
 };
-function f(e) {
-	let t = e && typeof e == "object" ? e : {}, n = { ...u };
-	if (t.style && typeof t.style == "object") for (let e of Object.keys(u)) {
+function m(e) {
+	let t = e && typeof e == "object" ? e : {}, n = { ...f };
+	if (t.style && typeof t.style == "object") for (let e of Object.keys(f)) {
 		let r = t.style[e];
-		r != null && typeof r == typeof u[e] && (n[e] = r);
+		r != null && typeof r == typeof f[e] && (n[e] = r);
 	}
 	let r = {};
 	if (t.layers && typeof t.layers == "object") for (let [e, n] of Object.entries(t.layers)) {
 		let t = n ?? {};
 		r[e] = {
 			enabled: t.enabled !== !1,
-			template: typeof t.template == "string" ? t.template : ""
+			template: typeof t.template == "string" ? _(t.template) : ""
 		};
 	}
 	return {
@@ -172,25 +339,35 @@ function f(e) {
 		layers: r
 	};
 }
-var p = {
+var h = {
 	"&": "&amp;",
 	"<": "&lt;",
 	">": "&gt;",
 	"\"": "&quot;",
 	"'": "&#39;"
-}, m = (e) => String(e).replace(/[&<>"']/g, (e) => p[e]);
-function h(e, t) {
-	for (let n of e.split("|")) {
-		let e = n.trim();
+}, g = (e) => String(e).replace(/[&<>"']/g, (e) => h[e]);
+function _(e) {
+	let t = /\{name:(de|en)\|/.exec(e)?.[1] ?? "en";
+	return e.replace("{subclass|class}", `{kind_${t}}`);
+}
+function v(e, n) {
+	for (let r of e.split("|")) {
+		let e = r.trim();
 		if (!e) continue;
-		let r = e[0];
-		if ((r === "'" || r === "\"") && e.length >= 2 && e.endsWith(r)) return e.slice(1, -1);
-		let i = t[e];
-		if (i != null && i !== "") return String(i);
+		let i = e[0];
+		if ((i === "'" || i === "\"") && e.length >= 2 && e.endsWith(i)) return e.slice(1, -1);
+		let a = /^kind(?:_(de|en))?$/.exec(e);
+		if (a) {
+			let e = t(n.subclass || n.class, a[1] ?? "en");
+			if (e) return e;
+			continue;
+		}
+		let o = n[e];
+		if (o != null && o !== "") return String(o);
 	}
 	return "";
 }
-var g = /* @__PURE__ */ new Set([
+var y = /* @__PURE__ */ new Set([
 	"A",
 	"B",
 	"STRONG",
@@ -209,11 +386,11 @@ var g = /* @__PURE__ */ new Set([
 	"SUB",
 	"SUP"
 ]);
-function _(e) {
+function b(e) {
 	let t = e.trim();
 	return /^https?:\/\/[^\s"'<>]+$/i.test(t) ? t : /^www\.[^\s"'<>]+$/i.test(t) ? `https://${t}` : null;
 }
-var v = /* @__PURE__ */ new Set([
+var x = /* @__PURE__ */ new Set([
 	"SCRIPT",
 	"STYLE",
 	"IFRAME",
@@ -223,18 +400,18 @@ var v = /* @__PURE__ */ new Set([
 	"SVG",
 	"MATH"
 ]);
-function y(e) {
+function S(e) {
 	for (let t of [...e.childNodes]) if (t.nodeType === 1) {
 		let e = t;
-		if (v.has(e.tagName)) {
+		if (x.has(e.tagName)) {
 			e.remove();
 			continue;
 		}
-		if (y(e), !g.has(e.tagName)) {
+		if (S(e), !y.has(e.tagName)) {
 			e.replaceWith(...e.childNodes);
 			continue;
 		}
-		let n = e.tagName === "A" ? _(e.getAttribute("href") ?? "") : null;
+		let n = e.tagName === "A" ? b(e.getAttribute("href") ?? "") : null;
 		for (let t of [...e.attributes]) t.name === "class" || t.name === "style" && !/url\s*\(|expression|javascript:/i.test(t.value) || e.removeAttribute(t.name);
 		if (e.tagName === "A") {
 			if (!n) {
@@ -245,40 +422,40 @@ function y(e) {
 		}
 	} else t.nodeType !== 3 && t.remove();
 }
-function b(e) {
+function C(e) {
 	if (typeof document > "u") return e;
 	let t = document.createElement("template");
-	return t.innerHTML = e, y(t.content), t.innerHTML;
+	return t.innerHTML = e, S(t.content), t.innerHTML;
 }
-function x(e, t = {}) {
+function w(e, t = {}) {
 	let n = [];
 	for (let r of String(e || "").split(/\r?\n/)) {
 		let e = !1, i = !0, a = r.replace(/\{([^{}]+)\}/g, (n, r) => {
 			e = !0;
-			let a = h(r, t);
-			return a !== "" && (i = !1), m(a);
+			let a = v(r, t);
+			return a !== "" && (i = !1), g(a);
 		});
 		e && i || a.trim() && n.push(a);
 	}
-	return b(n.join("<br>"));
+	return C(n.join("<br>"));
 }
-var S = (e) => String(e).replace(/[{}<>;]/g, ""), C = {
+var T = (e) => String(e).replace(/[{}<>;]/g, ""), E = {
 	foot: "<path d=\"M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5.5c0 3.11-2 5.66-2 8.68V16a2 2 0 1 1-4 0Z\"/><path d=\"M20 20v-2.38c0-2.12 1.03-3.12 1-5.62-.03-2.72-1.49-6-4.5-6C14.63 6 14 7.8 14 9.5c0 3.11 2 5.66 2 8.68V20a2 2 0 1 0 4 0Z\"/><path d=\"M16 17h4\"/><path d=\"M4 13h4\"/>",
 	bike: "<circle cx=\"18.5\" cy=\"17.5\" r=\"3.5\"/><circle cx=\"5.5\" cy=\"17.5\" r=\"3.5\"/><circle cx=\"15\" cy=\"5\" r=\"1\"/><path d=\"M12 17.5V14l-3-3 4-3 2 3h2\"/>",
 	car: "<path d=\"M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2\"/><circle cx=\"7\" cy=\"17\" r=\"2\"/><path d=\"M9 17h6\"/><circle cx=\"17\" cy=\"17\" r=\"2\"/>",
 	train: "<path d=\"M8 3.1V7a4 4 0 0 0 8 0V3.1\"/><path d=\"m9 15-1-1\"/><path d=\"m15 15 1-1\"/><path d=\"M9 19c-2.8 0-5-2.2-5-5v-4a8 8 0 0 1 16 0v4c0 2.8-2.2 5-5 5Z\"/><path d=\"m8 19-2 3\"/><path d=\"m16 19 2 3\"/>",
 	line: "<circle cx=\"19\" cy=\"5\" r=\"2\"/><circle cx=\"5\" cy=\"19\" r=\"2\"/><path d=\"M5 17A12 12 0 0 1 17 5\"/>"
 };
-function w(e) {
-	return Object.entries(C).map(([t, n]) => {
+function D(e) {
+	return Object.entries(E).map(([t, n]) => {
 		let r = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${n}</svg>`, i = `url("data:image/svg+xml,${encodeURIComponent(r)}") center / contain no-repeat`;
 		return `${e} .msx-icon-${t}{display:inline-block;width:1.1em;height:1.1em;margin-right:.35em;vertical-align:-.2em;background:currentColor;-webkit-mask:${i};mask:${i};}`;
 	}).join("\n");
 }
-function T(e, t) {
-	let n = `.${t}`, r = S(e.background), i = (e, t) => e.map((e) => `${n}.maplibregl-popup-anchor-${e} .maplibregl-popup-tip`).join(",") + `{border-${t}-color:${r};}`;
+function O(e, t) {
+	let n = `.${t}`, r = T(e.background), i = (e, t) => e.map((e) => `${n}.maplibregl-popup-anchor-${e} .maplibregl-popup-tip`).join(",") + `{border-${t}-color:${r};}`;
 	return [
-		`${n} .maplibregl-popup-content{background:${r};color:${S(e.color)};font-family:${S(e.fontFamily)};font-size:${Number(e.fontSize)}px;line-height:${Number(e.lineHeight)};padding:${Number(e.padding)}px;border-radius:${Number(e.radius)}px;border:${Number(e.borderWidth)}px solid ${S(e.borderColor)};box-shadow:${d[e.shadow] ?? d.soft};` + (Number(e.blur) > 0 ? `-webkit-backdrop-filter:blur(${Number(e.blur)}px) saturate(1.7);backdrop-filter:blur(${Number(e.blur)}px) saturate(1.7);` : "") + "}",
+		`${n} .maplibregl-popup-content{background:${r};color:${T(e.color)};font-family:${T(e.fontFamily)};font-size:${Number(e.fontSize)}px;line-height:${Number(e.lineHeight)};padding:${Number(e.padding)}px;border-radius:${Number(e.radius)}px;border:${Number(e.borderWidth)}px solid ${T(e.borderColor)};box-shadow:${p[e.shadow] ?? p.soft};` + (Number(e.blur) > 0 ? `-webkit-backdrop-filter:blur(${Number(e.blur)}px) saturate(1.7);backdrop-filter:blur(${Number(e.blur)}px) saturate(1.7);` : "") + "}",
 		`${n} .maplibregl-popup-close-button{top:6px;right:6px;width:20px;height:20px;padding:0;border-radius:6px;color:inherit;opacity:.55;font-size:16px;line-height:18px;background:transparent;}`,
 		`${n} .maplibregl-popup-close-button:hover{opacity:1;background:rgba(127,127,127,.18);}`,
 		`${n} a{color:inherit;text-decoration:none;}`,
@@ -297,55 +474,55 @@ function T(e, t) {
 		i(["left"], "right"),
 		i(["right"], "left"),
 		e.tip ? "" : `${n} .maplibregl-popup-tip{display:none;}`,
-		w(n)
+		D(n)
 	].join("\n");
 }
-var E = 0;
-function D(e, t = {}) {
+var k = 0;
+function A(e, t = {}) {
 	let n = t.maplibregl ?? globalThis.maplibregl;
 	if (!n?.Popup) throw Error("MapStylerTooltips: maplibregl wurde nicht gefunden.");
-	let r = `msx-tooltip-${++E}`, a = document.createElement("style");
-	a.dataset.mapstyler = r, document.head.appendChild(a);
-	let o = null, l = null, u = !0, d = "", p = () => o ? Object.keys(o.layers).filter((t) => o.layers[t].enabled && o.layers[t].template && e.getLayer(t)) : [], m = (t) => {
-		let n = p();
+	let r = `msx-tooltip-${++k}`, i = document.createElement("style");
+	i.dataset.mapstyler = r, document.head.appendChild(i);
+	let a = null, s = null, c = !0, d = "", f = () => a ? Object.keys(a.layers).filter((t) => a.layers[t].enabled && a.layers[t].template && e.getLayer(t)) : [], p = (t) => {
+		let n = f();
 		return n.length ? e.queryRenderedFeatures(t.point, { layers: n })[0] ?? null : null;
 	}, h = () => {
-		d = "", l?.isOpen() && l.remove();
+		d = "", s?.isOpen() && s.remove();
 	}, g = (t, n) => {
-		if (!o || !l) return;
-		let r = x(o.layers[t.layer.id].template, t.properties ?? {});
+		if (!a || !s) return;
+		let r = w(a.layers[t.layer.id].template, t.properties ?? {});
 		if (!r) return h();
-		let i = t.geometry.type === "Point" ? t.geometry.coordinates : null, a = i ?? [n.lngLat.lng, n.lngLat.lat], s = `${t.layer.id}|${t.id ?? ""}|${r}|${i ? i.join(",") : a.join(",")}`;
-		s === d && l.isOpen() || (d = s, l.setLngLat(a).setHTML(r), l.isOpen() || l.addTo(e));
+		let i = t.geometry.type === "Point" ? t.geometry.coordinates : null, o = i ?? [n.lngLat.lng, n.lngLat.lat], c = `${t.layer.id}|${t.id ?? ""}|${r}|${i ? i.join(",") : o.join(",")}`;
+		c === d && s.isOpen() || (d = c, s.setLngLat(o).setHTML(r), s.isOpen() || s.addTo(e));
 	}, _ = (t) => {
-		if (!u || !o) return;
-		let n = m(t);
-		e.getCanvas().style.cursor = n ? "pointer" : "", o.trigger === "hover" && (n ? g(n, t) : h());
+		if (!c || !a) return;
+		let n = p(t);
+		e.getCanvas().style.cursor = n ? "pointer" : "", a.trigger === "hover" && (n ? g(n, t) : h());
 	}, v = (e) => {
-		if (!u || !o || o.trigger !== "click") return;
-		let t = m(e);
+		if (!c || !a || a.trigger !== "click") return;
+		let t = p(e);
 		t ? g(t, e) : h();
 	}, y = () => {
-		u && (e.getCanvas().style.cursor = "", o?.trigger === "hover" && h());
+		c && (e.getCanvas().style.cursor = "", a?.trigger === "hover" && h());
 	}, b = (e) => {
-		o = f(e), a.textContent = T(o.style, r), l?.remove(), l = new n.Popup({
-			className: `msx-tooltip ${r}${o.trigger === "click" ? " msx-click" : ""}`,
-			closeButton: o.trigger === "click",
+		a = m(e), i.textContent = O(a.style, r), s?.remove(), s = new n.Popup({
+			className: `msx-tooltip ${r}${a.trigger === "click" ? " msx-click" : ""}`,
+			closeButton: a.trigger === "click",
 			closeOnClick: !1,
-			maxWidth: `${o.style.maxWidth}px`,
+			maxWidth: `${a.style.maxWidth}px`,
 			offset: 10,
 			focusAfterOpen: !1
 		}), d = "";
-	}, S = () => e.getStyle()?.metadata && e.getStyle().metadata["mapstyler:tooltips"], C = () => b(S()), w = (t) => {
+	}, x = () => e.getStyle()?.metadata && e.getStyle().metadata["mapstyler:tooltips"], S = () => b(x()), C = (t) => {
 		if (!e.hasImage(t)) {
 			if (t.startsWith("msx-pin-")) {
-				let n = i(t);
+				let n = o(t);
 				n && e.addImage(t, n, { pixelRatio: 2 });
 			} else if (t.startsWith("msx-ascii-")) {
-				let n = s(t);
+				let n = l(t);
 				n && e.addImage(t, n, { pixelRatio: 2 });
 			} else if (t.startsWith("msx-box-")) {
-				let n = c(t);
+				let n = u(t);
 				n && e.addImage(t, n, {
 					pixelRatio: 2,
 					stretchX: [[4, 12]],
@@ -359,27 +536,27 @@ function D(e, t = {}) {
 				});
 			}
 		}
-	}, D = (e) => w(e.id);
-	e.on("styleimagemissing", D);
-	let O = (e, t) => {
-		typeof e == "string" ? (e.startsWith("msx-ascii-") || e.startsWith("msx-box-")) && t.add(e) : Array.isArray(e) ? e.forEach((e) => O(e, t)) : e && typeof e == "object" && Object.values(e).forEach((e) => O(e, t));
-	}, k = () => {
+	}, T = (e) => C(e.id);
+	e.on("styleimagemissing", T);
+	let E = (e, t) => {
+		typeof e == "string" ? (e.startsWith("msx-ascii-") || e.startsWith("msx-box-")) && t.add(e) : Array.isArray(e) ? e.forEach((e) => E(e, t)) : e && typeof e == "object" && Object.values(e).forEach((e) => E(e, t));
+	}, D = () => {
 		let t = e.getStyle();
 		if (!t?.layers) return;
 		let n = /* @__PURE__ */ new Set();
-		for (let e of t.layers) O(e.paint, n), O(e.layout, n);
-		n.forEach(w);
+		for (let e of t.layers) E(e.paint, n), E(e.layout, n);
+		n.forEach(C);
 	};
-	return e.on("styledata", k), e.on("mousemove", _), e.on("click", v), e.on("mouseout", y), t.config === void 0 ? (e.isStyleLoaded() && C(), e.on("style.load", C)) : b(t.config), {
+	return e.on("styledata", D), e.on("mousemove", _), e.on("click", v), e.on("mouseout", y), t.config === void 0 ? (e.isStyleLoaded() && S(), e.on("style.load", S)) : b(t.config), {
 		className: r,
 		update: b,
 		setEnabled(e) {
-			u = e, u || h();
+			c = e, c || h();
 		},
 		destroy() {
-			e.off("mousemove", _), e.off("click", v), e.off("mouseout", y), e.off("style.load", C), e.off("styleimagemissing", D), e.off("styledata", k), l?.remove(), a.remove();
+			e.off("mousemove", _), e.off("click", v), e.off("mouseout", y), e.off("style.load", S), e.off("styleimagemissing", T), e.off("styledata", D), s?.remove(), i.remove();
 		}
 	};
 }
 //#endregion
-export { u as DEFAULT_STYLE, l as KEY, e as PIN_TYPES, D as attach, i as drawPinImage, f as normalize, x as renderTemplate, b as sanitize, T as tooltipCss };
+export { f as DEFAULT_STYLE, d as KEY, n as PIN_TYPES, A as attach, o as drawPinImage, m as normalize, w as renderTemplate, C as sanitize, O as tooltipCss };

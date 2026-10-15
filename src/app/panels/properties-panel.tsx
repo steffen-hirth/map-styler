@@ -195,7 +195,7 @@ function TooltipSection({ layer }: { layer: Layer }) {
               onBlur={() => store.commit()}
             />
             <p className="text-[10px] leading-relaxed text-subtle">
-              {t('{feld} fügt einen Wert ein, {name:de|name} nimmt den ersten vorhandenen. Leere Zeilen fallen weg.')}
+              {t('{feld} fügt einen Wert ein, {name:de|name} nimmt den ersten vorhandenen, {kind_de} die Art (z. B. Park). Leere Zeilen fallen weg.')}
             </p>
           </div>
           <div className="flex flex-col gap-1.5">
