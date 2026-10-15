@@ -70,9 +70,20 @@ export const EN: Record<string, string> = {
   Kartenvorschau: 'Map preview',
   'Unbekannter Kartenfehler': 'Unknown map error',
 
+  // Dialogs
+  Abbrechen: 'Cancel',
+  OK: 'OK',
+  'Eigene Style-URL': 'Custom style URL',
+  'URL einer MapLibre-Style-JSON, z. B. von OpenFreeMap oder einem eigenen Server.': 'URL of a MapLibre style JSON, e.g. from OpenFreeMap or your own server.',
+  Laden: 'Load',
+  'Aktuellen Style ersetzen?': 'Replace current style?',
+  'Mit Rückgängig kommst du jederzeit zurück.': 'You can always go back with undo.',
+  Ersetzen: 'Replace',
+  'Vorlage „{name}“ laden?': 'Load template “{name}”?',
+  'Deine Änderungen bleiben über Rückgängig erreichbar.': 'Your changes stay available via undo.',
+  'Vorlage laden': 'Load template',
+
   // Toolbar
-  'URL einer MapLibre-Style-JSON:': 'URL of a MapLibre style JSON:',
-  'Den aktuellen Style ersetzen? Mit Rückgängig kommst du zurück.': 'Replace the current style? You can go back with undo.',
   'Lade Style …': 'Loading style …',
   '„{name}“ geladen': '“{name}” loaded',
   'Style konnte nicht geladen werden: {message}': 'Could not load style: {message}',
@@ -143,7 +154,6 @@ export const EN: Record<string, string> = {
   Fallback: 'Fallback',
 
   // Templates
-  'Vorlage „{name}“ laden? Deine Änderungen bleiben über Rückgängig erreichbar.': 'Load template “{name}”? Your changes stay available via undo.',
   'Vorlage „{name}“ geladen': 'Template “{name}” loaded',
   'Vorlage konnte nicht geladen werden: {message}': 'Could not load template: {message}',
   'Fertige Kartendesigns mit passenden Tooltips und Beispielroute. Danach lässt sich alles unter Ebenen, Farben, Routen und Tooltips anpassen.':

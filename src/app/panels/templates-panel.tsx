@@ -6,6 +6,7 @@ import { mapHolder } from '../../runtime/map/map-holder';
 import { store, useAppState } from '../../runtime/state/store';
 import { routeBounds, sampleRoute } from '../../runtime/style/route';
 import { cn } from '../../ui/lib/utils';
+import { confirmDialog } from '../../ui/dialog/dialog-host';
 import { PanelBody } from '../../ui/panel/panel';
 import { buildTemplate, TEMPLATE_KEY, TEMPLATES, type Template } from '../templates';
 
@@ -26,7 +27,15 @@ export function TemplatesPanel() {
 
   const apply = async (template: Template) => {
     if (loading) return;
-    if (store.getState().canUndo && !window.confirm(t('Vorlage „{name}“ laden? Deine Änderungen bleiben über Rückgängig erreichbar.', { name: t(template.name) }))) return;
+    if (
+      store.getState().canUndo &&
+      !(await confirmDialog({
+        title: t('Vorlage „{name}“ laden?', { name: t(template.name) }),
+        message: t('Deine Änderungen bleiben über Rückgängig erreichbar.'),
+        confirmLabel: t('Vorlage laden'),
+      }))
+    )
+      return;
     setLoading(template.id);
     try {
       store.replace(await buildTemplate(template));

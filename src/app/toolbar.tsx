@@ -6,6 +6,7 @@ import { fetchStyle, store, useAppState } from '../runtime/state/store';
 import { isStyle } from '../runtime/style/types';
 import { Button, IconButton } from '../ui/primitives/button';
 import { NativeSelect } from '../ui/primitives/input';
+import { confirmDialog, promptDialog } from '../ui/dialog/dialog-host';
 import { Panel } from '../ui/panel/panel';
 import { cn } from '../ui/lib/utils';
 import { BASE_STYLES, withDefaultTooltips } from './app-schema';
@@ -14,9 +15,25 @@ const Divider = () => <span className="mx-0.5 h-4 w-px bg-ink/[0.1]" aria-hidden
 
 export async function loadBaseStyle(id: string) {
   const preset = BASE_STYLES.find((b) => b.id === id);
-  const url = preset ? preset.url : window.prompt(t('URL einer MapLibre-Style-JSON:'), 'https://');
+  const url = preset
+    ? preset.url
+    : await promptDialog({
+        title: t('Eigene Style-URL'),
+        message: t('URL einer MapLibre-Style-JSON, z. B. von OpenFreeMap oder einem eigenen Server.'),
+        placeholder: 'https://…/style.json',
+        defaultValue: 'https://',
+        confirmLabel: t('Laden'),
+      });
   if (!url || url === 'https://') return;
-  if (store.getState().canUndo && !window.confirm(t('Den aktuellen Style ersetzen? Mit Rückgängig kommst du zurück.'))) return;
+  if (
+    store.getState().canUndo &&
+    !(await confirmDialog({
+      title: t('Aktuellen Style ersetzen?'),
+      message: t('Mit Rückgängig kommst du jederzeit zurück.'),
+      confirmLabel: t('Ersetzen'),
+    }))
+  )
+    return;
   const toastId = toast.loading(t('Lade Style …'));
   try {
     const style = await fetchStyle(url);
@@ -49,7 +66,7 @@ export function Toolbar({ className }: { className?: string }) {
   const fileRef = useRef<HTMLInputElement>(null);
 
   return (
-    <Panel className={cn('flex-row items-center gap-1 p-1', className)}>
+    <Panel className={cn('flex-row items-center gap-1 rounded-[14px] p-1.5 [&_button]:rounded-lg [&_select]:rounded-lg', className)}>
       <NativeSelect
         className="w-[150px]"
         value=""

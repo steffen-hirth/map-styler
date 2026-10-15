@@ -6,6 +6,7 @@ import { setLang, t, useLang } from '../i18n';
 import { Toaster } from 'sonner';
 import { MapCanvas } from '../runtime/map/map-canvas';
 import { store, useAppState, type Tab } from '../runtime/state/store';
+import { DialogHost } from '../ui/dialog/dialog-host';
 import { cn } from '../ui/lib/utils';
 import { Button } from '../ui/primitives/button';
 import { Panel, PanelHeader, PanelTabs } from '../ui/panel/panel';
@@ -78,7 +79,7 @@ function LangSwitch() {
           aria-pressed={lang === value}
           onClick={() => setLang(value)}
           className={cn(
-            'h-5 rounded-[5px] px-1.5 uppercase text-subtle transition-colors hover:text-foreground',
+            'h-5 rounded-[4px] px-1.5 uppercase text-subtle transition-colors hover:text-foreground',
             lang === value && 'bg-popover text-foreground shadow-[0_1px_2px_rgba(40,32,48,0.12)]',
           )}
         >
@@ -167,6 +168,7 @@ export function AppComposition() {
       ) : null}
 
       <ExportDialog key={`export-${lang}`} />
+      <DialogHost />
       <Toaster theme="light" position="top-center" toastOptions={{ className: 'text-xs' }} />
     </div>
   );
