@@ -10,6 +10,7 @@ import type { CustomLayerInterface, CustomRenderMethodInput, Map as MapLibreMap 
 
 export const GLASS_KEY = 'mapstyler:glass';
 const LAYER_ID = 'msx-glass';
+const PARKED = 24;
 
 export type GlassConfig = {
   /** The fill-extrusion layer to replace. */
@@ -281,7 +282,7 @@ const hexToRgb = (hex: string): [number, number, number] => {
 
 type Uniforms = Record<string, WebGLUniformLocation | null>;
 
-function createGlassLayer(map: MapLibreMap, getConfig: () => GlassConfig) {
+function createGlassLayer(map: MapLibreMap, getConfig: () => GlassConfig, getMinzoom: () => number) {
   let gl: WebGLRenderingContext | null = null;
   let program: WebGLProgram | null = null;
   let uniforms: Uniforms = {};
@@ -295,12 +296,12 @@ function createGlassLayer(map: MapLibreMap, getConfig: () => GlassConfig) {
 
   const rebuild = () => {
     const cfg = getConfig();
-    const layer = map.getLayer(cfg.layer) as { source?: string; sourceLayer?: string; filter?: unknown; minzoom?: number } | undefined;
+    const layer = map.getLayer(cfg.layer) as { source?: string; sourceLayer?: string; filter?: unknown } | undefined;
     if (!layer?.source) return;
     const center = map.getCenter();
     const nextOrigin = originAt(center.lng, center.lat);
     const data: number[] = [];
-    if (map.getZoom() >= (layer.minzoom ?? 0) - 0.5) {
+    if (map.getZoom() >= getMinzoom() - 0.5) {
       const features = map.querySourceFeatures(layer.source, {
         sourceLayer: layer.sourceLayer,
         filter: layer.filter as never,
@@ -450,34 +451,46 @@ export type GlassHandle = { refresh(): void; destroy(): void };
 /** Watch the style for metadata["mapstyler:glass"] and keep the glass layer in sync. */
 export function attachGlass(map: MapLibreMap): GlassHandle {
   let config: GlassConfig | null = null;
-  let hidden: string | null = null;
+  // The replaced extrusion is "parked" at a zoom range no map reaches instead of
+  // being hidden, so a later style that hides it on purpose is left alone.
+  let parked: { id: string; minzoom: number; maxzoom: number } | null = null;
   let last = '';
 
-  const restore = () => {
-    if (hidden && map.getLayer(hidden)) map.setLayoutProperty(hidden, 'visibility', 'visible');
-    hidden = null;
+  const park = (id: string) => {
+    const layer = map.getLayer(id);
+    if (!layer || layer.minzoom === PARKED) return;
+    parked = { id, minzoom: layer.minzoom ?? 0, maxzoom: layer.maxzoom ?? 24 };
+    map.setLayerZoomRange(id, PARKED, PARKED);
+  };
+
+  const unpark = () => {
+    if (parked && map.getLayer(parked.id)?.minzoom === PARKED) map.setLayerZoomRange(parked.id, parked.minzoom, parked.maxzoom);
+    parked = null;
   };
 
   const sync = () => {
     const style = map.getStyle();
     if (!style?.layers) return;
     const next = normalizeGlass((style.metadata as Record<string, unknown> | undefined)?.[GLASS_KEY]);
-    const target = next && map.getLayer(next.layer) ? next : null;
+    const visible = next && map.getLayer(next.layer) && map.getLayoutProperty(next.layer, 'visibility') !== 'none';
+    const target = visible ? next : null;
     const key = JSON.stringify(target);
     if (key !== last) {
       last = key;
-      if (hidden && hidden !== target?.layer) restore();
+      if (parked && parked.id !== target?.layer) unpark();
       config = target;
       if (!target && map.getLayer(LAYER_ID)) map.removeLayer(LAYER_ID);
     }
     if (!target) return;
-    // The regular extrusion stays in the style as the fallback; hide it here.
-    if (map.getLayoutProperty(target.layer, 'visibility') !== 'none') map.setLayoutProperty(target.layer, 'visibility', 'none');
-    hidden = target.layer;
+    // The regular extrusion stays in the style as the fallback; park it here.
+    park(target.layer);
     if (!map.getLayer(LAYER_ID)) {
       const ids = style.layers.map((l) => l.id);
       const before = ids[ids.indexOf(target.layer) + 1];
-      map.addLayer(createGlassLayer(map, () => config ?? DEFAULT_GLASS), before && before !== LAYER_ID ? before : undefined);
+      map.addLayer(
+        createGlassLayer(map, () => config ?? DEFAULT_GLASS, () => parked?.minzoom ?? 0),
+        before && before !== LAYER_ID ? before : undefined,
+      );
     }
     map.triggerRepaint();
   };
@@ -490,7 +503,7 @@ export function attachGlass(map: MapLibreMap): GlassHandle {
     destroy() {
       map.off('styledata', sync);
       if (map.getLayer(LAYER_ID)) map.removeLayer(LAYER_ID);
-      restore();
+      unpark();
     },
   };
 }

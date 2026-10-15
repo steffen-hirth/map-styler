@@ -79,8 +79,8 @@ export function drawPinImage(id: string): { width: number; height: number; data:
 
 export const PATTERN_PREFIX = 'msx-ascii-';
 
-// "stripe" is drawn as diagonal hatching instead of a character.
-const PATTERN_CHARS = { dot: '·', tilde: '~', hash: '#', plus: '+', slash: '/', colon: ':', dash: '-', star: '*', stripe: '' } as const;
+// "stripe" (bold) and "hatch" (fine) are drawn as diagonal lines instead of a character.
+const PATTERN_CHARS = { dot: '·', tilde: '~', hash: '#', plus: '+', slash: '/', colon: ':', dash: '-', star: '*', stripe: '', hatch: '' } as const;
 export type PatternChar = keyof typeof PATTERN_CHARS;
 
 /** Image id for a fill-pattern: one character on a background, e.g. "msx-ascii-hash-33ff66-0a0f0a". */
@@ -102,11 +102,13 @@ export function drawPatternImage(id: string): { width: number; height: number; d
   if (!ctx) return null;
   ctx.fillStyle = `#${match[3]}`;
   ctx.fillRect(0, 0, TILE, TILE);
-  if (match[1] === 'stripe') {
+  if (match[1] === 'stripe' || match[1] === 'hatch') {
     // Seamless 45° hatching: lines through the tile and its wrapped corners.
+    const fine = match[1] === 'hatch';
     ctx.strokeStyle = `#${match[2]}`;
-    ctx.lineWidth = 5;
-    for (const offset of [-TILE, 0, TILE]) {
+    ctx.lineWidth = fine ? 2.4 : 5;
+    const offsets = fine ? [-TILE, -TILE / 2, 0, TILE / 2, TILE] : [-TILE, 0, TILE];
+    for (const offset of offsets) {
       ctx.beginPath();
       ctx.moveTo(offset, TILE);
       ctx.lineTo(offset + TILE, 0);

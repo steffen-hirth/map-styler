@@ -173,28 +173,40 @@ const widthByRank = (rank: number, low: number[], high: number[]) => ['interpola
 const isStreetName = (layer: Layer) => layer.id.startsWith('highway-name');
 const isShield = (layer: Layer) => /ref/.test(JSON.stringify(layer.layout?.['text-field'] ?? ''));
 
-const IL = { paper: '#dcdbd5', stripe: '#e8574a', ink: '#23243a', water: '#ccd2d5' };
+const IL = { paper: '#e4e2db', hatch: '#e0604f', ink: '#23243a', water: '#b9cdd6', green: '#d5dccb' };
 
 /** Print illustration: red hatched blocks, paper streets, spaced ink capitals. */
 function illustration(style: Style): Style {
   return eachLayer(style, (layer) => {
     const group = groupOf(layer);
-    if (layer.type === 'background') return { ...layer, paint: { 'background-pattern': patternImageId('stripe', IL.stripe, IL.paper) } };
+    // The land between the streets is the hatched "block"; streets cut it as paper.
+    if (layer.type === 'background') return { ...layer, paint: { 'background-pattern': patternImageId('hatch', IL.hatch, IL.paper) } };
     if (layer.type === 'fill-extrusion') return hide(layer);
-    if (layer.type === 'fill') return group === 'water' ? { ...layer, paint: { 'fill-color': IL.water } } : hide(layer);
+    if (layer.type === 'fill') {
+      if (group === 'water') return { ...layer, paint: { 'fill-color': IL.water } };
+      // Parks and green spaces stay calm, unhatched areas.
+      if (layer['source-layer'] === 'park' || /park|grass|wood|forest|cemetery|pitch|playground/.test(layer.id)) {
+        return { ...layer, paint: { 'fill-color': IL.green, 'fill-antialias': true } };
+      }
+      return hide(layer);
+    }
     if (layer.type === 'line') {
       if (/casing|hatching/.test(layer.id) || group === 'boundaries') return hide(layer);
       if (group === 'water') return { ...layer, paint: { 'line-color': IL.water, 'line-width': pick(layer.paint, ['line-width'])['line-width'] ?? 2 } };
-      if (group === 'transit') return { ...layer, paint: { 'line-color': IL.ink, 'line-width': 1.6 } };
+      if (group === 'transit') return { ...layer, paint: { 'line-color': IL.ink, 'line-width': 1.2, 'line-dasharray': [3, 2] } };
       const rank = roadRank(layer.id);
-      return { ...layer, paint: { 'line-color': IL.paper, 'line-width': widthByRank(rank, [0.5, 1.2, 2, 3], [4, 12, 18, 24]) } };
+      return {
+        ...layer,
+        layout: { ...layer.layout, 'line-cap': 'round', 'line-join': 'round' },
+        paint: { 'line-color': IL.paper, 'line-width': widthByRank(rank, [0.8, 1.6, 2.6, 3.6], [7, 14, 22, 30]) },
+      };
     }
     if (layer.type === 'symbol') {
       if (group === 'poi' || isShield(layer)) return hide(layer);
       return {
         ...layer,
-        layout: { ...layer.layout, 'text-transform': 'uppercase', 'text-letter-spacing': 0.14, 'text-font': ['Noto Sans Bold'] },
-        paint: { 'text-color': IL.ink, 'text-halo-color': IL.paper, 'text-halo-width': 1, 'icon-opacity': 0 },
+        layout: { ...layer.layout, 'text-transform': 'uppercase', 'text-letter-spacing': 0.18, 'text-font': ['Noto Sans Bold'] },
+        paint: { 'text-color': IL.ink, 'text-halo-color': IL.paper, 'text-halo-width': 2, 'icon-opacity': 0 },
       };
     }
     return layer;
@@ -544,7 +556,7 @@ export const FANCY_TEMPLATES: Template[] = [
     name: 'Illustration',
     description: 'Wie gedruckt: rot schraffierte Blöcke, Papierstraßen, gesperrte Versalien.',
     base: 'liberty',
-    preview: { colors: ['#dcdbd5', '#e8a39a', '#dcdbd5', '#e8574a'], route: '#23243a' },
+    preview: { colors: ['#e4e2db', '#eba699', '#e4e2db', '#e0604f'], route: '#23243a' },
     language: 'de',
     extras: illustration,
     view: { zoom: 15.5, pitch: 0, bearing: 0 },
