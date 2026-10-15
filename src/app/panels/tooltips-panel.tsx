@@ -69,6 +69,9 @@ export function TooltipsPanel({ simple = false }: { simple?: boolean }) {
         </Field>
           </>
         )}
+        <Field label={t('Glas-Unschärfe')}>
+          <SliderControl value={style.blur} min={0} max={40} step={1} unit="px" label={t('Glas-Unschärfe')} onChange={(v, live) => setStyle('blur', v, live)} />
+        </Field>
         <Field label={t('Eckenradius')}>
           <SliderControl value={style.radius} min={0} max={24} step={1} unit="px" label={t('Eckenradius')} onChange={(v, live) => setStyle('radius', v, live)} />
         </Field>

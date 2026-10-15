@@ -78,9 +78,32 @@ function i(e) {
 		data: s.getImageData(0, 0, r, r).data
 	};
 }
+var a = {
+	dot: "·",
+	tilde: "~",
+	hash: "#",
+	plus: "+",
+	slash: "/",
+	colon: ":",
+	dash: "-",
+	star: "*"
+}, o = 28;
+function s(e) {
+	if (!e.startsWith("msx-ascii-") || typeof document > "u") return null;
+	let t = /^([a-z]+)-([0-9a-f]{6})-([0-9a-f]{6})$/i.exec(e.slice(10));
+	if (!t || !(t[1] in a)) return null;
+	let n = document.createElement("canvas");
+	n.width = o, n.height = o;
+	let r = n.getContext("2d");
+	return r ? (r.fillStyle = `#${t[3]}`, r.fillRect(0, 0, o, o), r.fillStyle = `#${t[2]}`, r.font = "600 20px ui-monospace, \"SF Mono\", Menlo, Consolas, monospace", r.textAlign = "center", r.textBaseline = "middle", r.fillText(a[t[1]], o / 2, 15), {
+		width: o,
+		height: o,
+		data: r.getImageData(0, 0, o, o).data
+	}) : null;
+}
 //#endregion
 //#region src/runtime/tooltips/index.ts
-var a = "mapstyler:tooltips", o = {
+var c = "mapstyler:tooltips", l = {
 	background: "#ffffff",
 	color: "#1f2328",
 	fontFamily: "system-ui, -apple-system, \"Segoe UI\", sans-serif",
@@ -92,17 +115,18 @@ var a = "mapstyler:tooltips", o = {
 	borderWidth: 1,
 	shadow: "soft",
 	maxWidth: 260,
-	tip: !0
-}, s = {
+	tip: !0,
+	blur: 0
+}, u = {
 	none: "none",
 	soft: "0 4px 14px rgba(0, 0, 0, 0.12)",
 	strong: "0 10px 30px rgba(0, 0, 0, 0.3)"
 };
-function c(e) {
-	let t = e && typeof e == "object" ? e : {}, n = { ...o };
-	if (t.style && typeof t.style == "object") for (let e of Object.keys(o)) {
+function d(e) {
+	let t = e && typeof e == "object" ? e : {}, n = { ...l };
+	if (t.style && typeof t.style == "object") for (let e of Object.keys(l)) {
 		let r = t.style[e];
-		r != null && typeof r == typeof o[e] && (n[e] = r);
+		r != null && typeof r == typeof l[e] && (n[e] = r);
 	}
 	let r = {};
 	if (t.layers && typeof t.layers == "object") for (let [e, n] of Object.entries(t.layers)) {
@@ -118,14 +142,14 @@ function c(e) {
 		layers: r
 	};
 }
-var l = {
+var f = {
 	"&": "&amp;",
 	"<": "&lt;",
 	">": "&gt;",
 	"\"": "&quot;",
 	"'": "&#39;"
-}, u = (e) => String(e).replace(/[&<>"']/g, (e) => l[e]);
-function d(e, t) {
+}, p = (e) => String(e).replace(/[&<>"']/g, (e) => f[e]);
+function m(e, t) {
 	for (let n of e.split("|")) {
 		let e = n.trim();
 		if (!e) continue;
@@ -136,7 +160,7 @@ function d(e, t) {
 	}
 	return "";
 }
-var f = /* @__PURE__ */ new Set([
+var h = /* @__PURE__ */ new Set([
 	"B",
 	"STRONG",
 	"I",
@@ -153,7 +177,7 @@ var f = /* @__PURE__ */ new Set([
 	"HR",
 	"SUB",
 	"SUP"
-]), p = /* @__PURE__ */ new Set([
+]), g = /* @__PURE__ */ new Set([
 	"SCRIPT",
 	"STYLE",
 	"IFRAME",
@@ -163,42 +187,54 @@ var f = /* @__PURE__ */ new Set([
 	"SVG",
 	"MATH"
 ]);
-function m(e) {
+function _(e) {
 	for (let t of [...e.childNodes]) if (t.nodeType === 1) {
 		let e = t;
-		if (p.has(e.tagName)) {
+		if (g.has(e.tagName)) {
 			e.remove();
 			continue;
 		}
-		if (m(e), !f.has(e.tagName)) {
+		if (_(e), !h.has(e.tagName)) {
 			e.replaceWith(...e.childNodes);
 			continue;
 		}
 		for (let t of [...e.attributes]) t.name === "class" || t.name === "style" && !/url\s*\(|expression|javascript:/i.test(t.value) || e.removeAttribute(t.name);
 	} else t.nodeType !== 3 && t.remove();
 }
-function h(e) {
+function v(e) {
 	if (typeof document > "u") return e;
 	let t = document.createElement("template");
-	return t.innerHTML = e, m(t.content), t.innerHTML;
+	return t.innerHTML = e, _(t.content), t.innerHTML;
 }
-function g(e, t = {}) {
+function y(e, t = {}) {
 	let n = [];
 	for (let r of String(e || "").split(/\r?\n/)) {
 		let e = !1, i = !0, a = r.replace(/\{([^{}]+)\}/g, (n, r) => {
 			e = !0;
-			let a = d(r, t);
-			return a !== "" && (i = !1), u(a);
+			let a = m(r, t);
+			return a !== "" && (i = !1), p(a);
 		});
 		e && i || a.trim() && n.push(a);
 	}
-	return h(n.join("<br>"));
+	return v(n.join("<br>"));
 }
-var _ = (e) => String(e).replace(/[{}<>;]/g, "");
-function v(e, t) {
-	let n = `.${t}`, r = _(e.background), i = (e, t) => e.map((e) => `${n}.maplibregl-popup-anchor-${e} .maplibregl-popup-tip`).join(",") + `{border-${t}-color:${r};}`;
+var b = (e) => String(e).replace(/[{}<>;]/g, ""), x = {
+	foot: "<path d=\"M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5.5c0 3.11-2 5.66-2 8.68V16a2 2 0 1 1-4 0Z\"/><path d=\"M20 20v-2.38c0-2.12 1.03-3.12 1-5.62-.03-2.72-1.49-6-4.5-6C14.63 6 14 7.8 14 9.5c0 3.11 2 5.66 2 8.68V20a2 2 0 1 0 4 0Z\"/><path d=\"M16 17h4\"/><path d=\"M4 13h4\"/>",
+	bike: "<circle cx=\"18.5\" cy=\"17.5\" r=\"3.5\"/><circle cx=\"5.5\" cy=\"17.5\" r=\"3.5\"/><circle cx=\"15\" cy=\"5\" r=\"1\"/><path d=\"M12 17.5V14l-3-3 4-3 2 3h2\"/>",
+	car: "<path d=\"M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2\"/><circle cx=\"7\" cy=\"17\" r=\"2\"/><path d=\"M9 17h6\"/><circle cx=\"17\" cy=\"17\" r=\"2\"/>",
+	train: "<path d=\"M8 3.1V7a4 4 0 0 0 8 0V3.1\"/><path d=\"m9 15-1-1\"/><path d=\"m15 15 1-1\"/><path d=\"M9 19c-2.8 0-5-2.2-5-5v-4a8 8 0 0 1 16 0v4c0 2.8-2.2 5-5 5Z\"/><path d=\"m8 19-2 3\"/><path d=\"m16 19 2 3\"/>",
+	line: "<circle cx=\"19\" cy=\"5\" r=\"2\"/><circle cx=\"5\" cy=\"19\" r=\"2\"/><path d=\"M5 17A12 12 0 0 1 17 5\"/>"
+};
+function S(e) {
+	return Object.entries(x).map(([t, n]) => {
+		let r = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${n}</svg>`, i = `url("data:image/svg+xml,${encodeURIComponent(r)}") center / contain no-repeat`;
+		return `${e} .msx-icon-${t}{display:inline-block;width:1.1em;height:1.1em;margin-right:.35em;vertical-align:-.2em;background:currentColor;-webkit-mask:${i};mask:${i};}`;
+	}).join("\n");
+}
+function C(e, t) {
+	let n = `.${t}`, r = b(e.background), i = (e, t) => e.map((e) => `${n}.maplibregl-popup-anchor-${e} .maplibregl-popup-tip`).join(",") + `{border-${t}-color:${r};}`;
 	return [
-		`${n} .maplibregl-popup-content{background:${r};color:${_(e.color)};font-family:${_(e.fontFamily)};font-size:${Number(e.fontSize)}px;line-height:${Number(e.lineHeight)};padding:${Number(e.padding)}px;border-radius:${Number(e.radius)}px;border:${Number(e.borderWidth)}px solid ${_(e.borderColor)};box-shadow:${s[e.shadow] ?? s.soft};}`,
+		`${n} .maplibregl-popup-content{background:${r};color:${b(e.color)};font-family:${b(e.fontFamily)};font-size:${Number(e.fontSize)}px;line-height:${Number(e.lineHeight)};padding:${Number(e.padding)}px;border-radius:${Number(e.radius)}px;border:${Number(e.borderWidth)}px solid ${b(e.borderColor)};box-shadow:${u[e.shadow] ?? u.soft};` + (Number(e.blur) > 0 ? `-webkit-backdrop-filter:blur(${Number(e.blur)}px) saturate(1.7);backdrop-filter:blur(${Number(e.blur)}px) saturate(1.7);` : "") + "}",
 		`${n} .maplibregl-popup-close-button{top:6px;right:6px;width:20px;height:20px;padding:0;border-radius:6px;color:inherit;opacity:.55;font-size:16px;line-height:18px;background:transparent;}`,
 		`${n} .maplibregl-popup-close-button:hover{opacity:1;background:rgba(127,127,127,.18);}`,
 		`${n}.msx-click .maplibregl-popup-content{padding-right:${Number(e.padding) + 24}px;}`,
@@ -214,38 +250,39 @@ function v(e, t) {
 		], "top"),
 		i(["left"], "right"),
 		i(["right"], "left"),
-		e.tip ? "" : `${n} .maplibregl-popup-tip{display:none;}`
+		e.tip ? "" : `${n} .maplibregl-popup-tip{display:none;}`,
+		S(n)
 	].join("\n");
 }
-var y = 0;
-function b(e, t = {}) {
+var w = 0;
+function T(e, t = {}) {
 	let n = t.maplibregl ?? globalThis.maplibregl;
 	if (!n?.Popup) throw Error("MapStylerTooltips: maplibregl wurde nicht gefunden.");
-	let r = `msx-tooltip-${++y}`, a = document.createElement("style");
+	let r = `msx-tooltip-${++w}`, a = document.createElement("style");
 	a.dataset.mapstyler = r, document.head.appendChild(a);
-	let o = null, s = null, l = !0, u = "", d = () => o ? Object.keys(o.layers).filter((t) => o.layers[t].enabled && o.layers[t].template && e.getLayer(t)) : [], f = (t) => {
-		let n = d();
+	let o = null, c = null, l = !0, u = "", f = () => o ? Object.keys(o.layers).filter((t) => o.layers[t].enabled && o.layers[t].template && e.getLayer(t)) : [], p = (t) => {
+		let n = f();
 		return n.length ? e.queryRenderedFeatures(t.point, { layers: n })[0] ?? null : null;
-	}, p = () => {
-		u = "", s?.isOpen() && s.remove();
-	}, m = (t, n) => {
-		if (!o || !s) return;
-		let r = g(o.layers[t.layer.id].template, t.properties ?? {});
-		if (!r) return p();
-		let i = t.geometry.type === "Point" ? t.geometry.coordinates : null, a = i ?? [n.lngLat.lng, n.lngLat.lat], c = `${t.layer.id}|${t.id ?? ""}|${r}|${i ? i.join(",") : a.join(",")}`;
-		c === u && s.isOpen() || (u = c, s.setLngLat(a).setHTML(r), s.isOpen() || s.addTo(e));
-	}, h = (t) => {
+	}, m = () => {
+		u = "", c?.isOpen() && c.remove();
+	}, h = (t, n) => {
+		if (!o || !c) return;
+		let r = y(o.layers[t.layer.id].template, t.properties ?? {});
+		if (!r) return m();
+		let i = t.geometry.type === "Point" ? t.geometry.coordinates : null, a = i ?? [n.lngLat.lng, n.lngLat.lat], s = `${t.layer.id}|${t.id ?? ""}|${r}|${i ? i.join(",") : a.join(",")}`;
+		s === u && c.isOpen() || (u = s, c.setLngLat(a).setHTML(r), c.isOpen() || c.addTo(e));
+	}, g = (t) => {
 		if (!l || !o) return;
-		let n = f(t);
-		e.getCanvas().style.cursor = n ? "pointer" : "", o.trigger === "hover" && (n ? m(n, t) : p());
+		let n = p(t);
+		e.getCanvas().style.cursor = n ? "pointer" : "", o.trigger === "hover" && (n ? h(n, t) : m());
 	}, _ = (e) => {
 		if (!l || !o || o.trigger !== "click") return;
-		let t = f(e);
-		t ? m(t, e) : p();
-	}, b = () => {
-		l && (e.getCanvas().style.cursor = "", o?.trigger === "hover" && p());
-	}, x = (e) => {
-		o = c(e), a.textContent = v(o.style, r), s?.remove(), s = new n.Popup({
+		let t = p(e);
+		t ? h(t, e) : m();
+	}, v = () => {
+		l && (e.getCanvas().style.cursor = "", o?.trigger === "hover" && m());
+	}, b = (e) => {
+		o = d(e), a.textContent = C(o.style, r), c?.remove(), c = new n.Popup({
 			className: `msx-tooltip ${r}${o.trigger === "click" ? " msx-click" : ""}`,
 			closeButton: o.trigger === "click",
 			closeOnClick: !1,
@@ -253,21 +290,21 @@ function b(e, t = {}) {
 			offset: 10,
 			focusAfterOpen: !1
 		}), u = "";
-	}, S = () => e.getStyle()?.metadata && e.getStyle().metadata["mapstyler:tooltips"], C = () => x(S()), w = (t) => {
-		if (!t.id.startsWith("msx-pin-") || e.hasImage(t.id)) return;
-		let n = i(t.id);
+	}, x = () => e.getStyle()?.metadata && e.getStyle().metadata["mapstyler:tooltips"], S = () => b(x()), T = (t) => {
+		if (e.hasImage(t.id)) return;
+		let n = t.id.startsWith("msx-pin-") ? i(t.id) : t.id.startsWith("msx-ascii-") ? s(t.id) : null;
 		n && e.addImage(t.id, n, { pixelRatio: 2 });
 	};
-	return e.on("styleimagemissing", w), e.on("mousemove", h), e.on("click", _), e.on("mouseout", b), t.config === void 0 ? (e.isStyleLoaded() && C(), e.on("style.load", C)) : x(t.config), {
+	return e.on("styleimagemissing", T), e.on("mousemove", g), e.on("click", _), e.on("mouseout", v), t.config === void 0 ? (e.isStyleLoaded() && S(), e.on("style.load", S)) : b(t.config), {
 		className: r,
-		update: x,
+		update: b,
 		setEnabled(e) {
-			l = e, l || p();
+			l = e, l || m();
 		},
 		destroy() {
-			e.off("mousemove", h), e.off("click", _), e.off("mouseout", b), e.off("style.load", C), e.off("styleimagemissing", w), s?.remove(), a.remove();
+			e.off("mousemove", g), e.off("click", _), e.off("mouseout", v), e.off("style.load", S), e.off("styleimagemissing", T), c?.remove(), a.remove();
 		}
 	};
 }
 //#endregion
-export { o as DEFAULT_STYLE, a as KEY, e as PIN_TYPES, b as attach, i as drawPinImage, c as normalize, g as renderTemplate, h as sanitize, v as tooltipCss };
+export { l as DEFAULT_STYLE, c as KEY, e as PIN_TYPES, T as attach, i as drawPinImage, d as normalize, y as renderTemplate, v as sanitize, C as tooltipCss };

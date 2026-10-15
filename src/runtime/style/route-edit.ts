@@ -3,7 +3,7 @@
 // geometry itself comes from the routing step.
 
 import { isPinType, type PinType } from '../tooltips/pin-icons';
-import { durationLabel, pinTypeLabel, stopKindLabel, type Feature, type FeatureCollection, type Position, type RouteMode } from './route';
+import { durationLabel, pinTypeLabel, stopKindLabel, tripLabel, type Feature, type FeatureCollection, type Position, type RouteMode } from './route';
 
 export type StopKind = 'start' | 'waypoint' | 'end';
 
@@ -85,6 +85,7 @@ export function writeRoute(points: RoutePoint[], line: RouteLine | null): Featur
         ...(line.distanceKm !== undefined ? { distance_km: line.distanceKm } : {}),
         ...(line.durationMin !== undefined ? { duration_min: line.durationMin } : {}),
         duration_label: durationLabel(line.durationMin, mode),
+        trip_label: tripLabel(line.distanceKm, line.durationMin),
       },
       geometry: { type: 'LineString', coordinates: line.coordinates },
     });

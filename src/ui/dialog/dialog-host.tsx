@@ -21,6 +21,8 @@ let current: DialogRequest | null = null;
 const listeners = new Set<() => void>();
 
 function show(request: DialogRequest) {
+  // Drop focus from the trigger so Enter in the dialog cannot re-activate it.
+  if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
   // A new dialog cancels one that is still open.
   current?.resolve(null);
   current = request;

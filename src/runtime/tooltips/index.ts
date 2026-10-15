@@ -3,7 +3,7 @@
 // map design and its tooltips. Built separately into cdn/ for embedding.
 
 import type { MapGeoJSONFeature, MapLayerMouseEvent, Map as MapLibreMap, MapMouseEvent, MapStyleImageMissingEvent, Popup, PopupOptions } from 'maplibre-gl';
-import { drawPinImage, PIN_IMAGE_PREFIX } from './pin-icons';
+import { drawPatternImage, drawPinImage, PATTERN_PREFIX, PIN_IMAGE_PREFIX } from './pin-icons';
 
 export { PIN_TYPES, drawPinImage } from './pin-icons';
 
@@ -25,6 +25,8 @@ export type TooltipStyle = {
   shadow: TooltipShadow;
   maxWidth: number;
   tip: boolean;
+  /** Background blur in px for a frosted / liquid glass look (0 = off). */
+  blur: number;
 };
 
 export type TooltipLayer = { enabled: boolean; template: string };
@@ -48,6 +50,7 @@ export const DEFAULT_STYLE: TooltipStyle = {
   shadow: 'soft',
   maxWidth: 260,
   tip: true,
+  blur: 0,
 };
 
 const SHADOWS: Record<TooltipShadow, string> = {
@@ -149,6 +152,26 @@ export function renderTemplate(template: string, props: Record<string, unknown> 
 
 const cssValue = (value: unknown) => String(value).replace(/[{}<>;]/g, '');
 
+// Travel mode icons (Lucide, ISC) for <i class="msx-icon-<mode>"> in templates.
+// They live in the stylesheet, so templates never need inline SVG.
+const MODE_ICONS: Record<string, string> = {
+  foot: '<path d="M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5.5c0 3.11-2 5.66-2 8.68V16a2 2 0 1 1-4 0Z"/><path d="M20 20v-2.38c0-2.12 1.03-3.12 1-5.62-.03-2.72-1.49-6-4.5-6C14.63 6 14 7.8 14 9.5c0 3.11 2 5.66 2 8.68V20a2 2 0 1 0 4 0Z"/><path d="M16 17h4"/><path d="M4 13h4"/>',
+  bike: '<circle cx="18.5" cy="17.5" r="3.5"/><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="15" cy="5" r="1"/><path d="M12 17.5V14l-3-3 4-3 2 3h2"/>',
+  car: '<path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/>',
+  train: '<path d="M8 3.1V7a4 4 0 0 0 8 0V3.1"/><path d="m9 15-1-1"/><path d="m15 15 1-1"/><path d="M9 19c-2.8 0-5-2.2-5-5v-4a8 8 0 0 1 16 0v4c0 2.8-2.2 5-5 5Z"/><path d="m8 19-2 3"/><path d="m16 19 2 3"/>',
+  line: '<circle cx="19" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><path d="M5 17A12 12 0 0 1 17 5"/>',
+};
+
+function iconCss(sel: string): string {
+  return Object.entries(MODE_ICONS)
+    .map(([mode, body]) => {
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${body}</svg>`;
+      const url = `url("data:image/svg+xml,${encodeURIComponent(svg)}") center / contain no-repeat`;
+      return `${sel} .msx-icon-${mode}{display:inline-block;width:1.1em;height:1.1em;margin-right:.35em;vertical-align:-.2em;background:currentColor;-webkit-mask:${url};mask:${url};}`;
+    })
+    .join('\n');
+}
+
 export function tooltipCss(style: TooltipStyle, className: string): string {
   const sel = `.${className}`;
   const bg = cssValue(style.background);
@@ -158,7 +181,11 @@ export function tooltipCss(style: TooltipStyle, className: string): string {
     `${sel} .maplibregl-popup-content{background:${bg};color:${cssValue(style.color)};font-family:${cssValue(style.fontFamily)};` +
       `font-size:${Number(style.fontSize)}px;line-height:${Number(style.lineHeight)};padding:${Number(style.padding)}px;` +
       `border-radius:${Number(style.radius)}px;border:${Number(style.borderWidth)}px solid ${cssValue(style.borderColor)};` +
-      `box-shadow:${SHADOWS[style.shadow] ?? SHADOWS.soft};}`,
+      `box-shadow:${SHADOWS[style.shadow] ?? SHADOWS.soft};` +
+      (Number(style.blur) > 0
+        ? `-webkit-backdrop-filter:blur(${Number(style.blur)}px) saturate(1.7);backdrop-filter:blur(${Number(style.blur)}px) saturate(1.7);`
+        : '') +
+      '}',
     // Click tooltips get a close button; keep it clear of the text.
     `${sel} .maplibregl-popup-close-button{top:6px;right:6px;width:20px;height:20px;padding:0;border-radius:6px;` +
       `color:inherit;opacity:.55;font-size:16px;line-height:18px;background:transparent;}`,
@@ -169,6 +196,7 @@ export function tooltipCss(style: TooltipStyle, className: string): string {
     tip(['left'], 'right'),
     tip(['right'], 'left'),
     style.tip ? '' : `${sel} .maplibregl-popup-tip{display:none;}`,
+    iconCss(sel),
   ].join('\n');
 }
 
@@ -272,9 +300,10 @@ export function attach(map: MapLibreMap, options: AttachOptions = {}): TooltipHa
   const onStyleLoad = () => update(readFromStyle());
 
   // Pin markers ("msx-pin-<type>-<color>") are drawn on demand.
+  // ASCII fill patterns ("msx-ascii-<char>-<fg>-<bg>") likewise.
   const onImageMissing = (e: MapStyleImageMissingEvent) => {
-    if (!e.id.startsWith(PIN_IMAGE_PREFIX) || map.hasImage(e.id)) return;
-    const image = drawPinImage(e.id);
+    if (map.hasImage(e.id)) return;
+    const image = e.id.startsWith(PIN_IMAGE_PREFIX) ? drawPinImage(e.id) : e.id.startsWith(PATTERN_PREFIX) ? drawPatternImage(e.id) : null;
     if (image) map.addImage(e.id, image, { pixelRatio: 2 });
   };
   map.on('styleimagemissing', onImageMissing);

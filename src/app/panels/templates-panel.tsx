@@ -45,7 +45,14 @@ export function TemplatesPanel() {
     setLoading(template.id);
     try {
       store.replace(await buildTemplate(template));
-      fitToRoute();
+      const map = mapHolder.get();
+      if (template.view && map) {
+        map.easeTo({ ...template.view, duration: 1400 });
+      } else {
+        // Flat templates start flat again.
+        if (map && (map.getPitch() || map.getBearing())) map.jumpTo({ pitch: 0, bearing: 0 });
+        fitToRoute();
+      }
       toast.success(t('Vorlage „{name}“ geladen', { name: t(template.name) }));
     } catch (err) {
       toast.error(t('Vorlage konnte nicht geladen werden: {message}', { message: (err as Error).message }));

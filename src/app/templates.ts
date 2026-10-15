@@ -10,10 +10,11 @@ import { applyLabelLanguage, removeItalic, type LabelLanguage } from '../runtime
 import type { Style } from '../runtime/style/types';
 import { KEY as TOOLTIP_KEY, normalize as normalizeTooltips, type TooltipStyle, type TooltipTrigger } from '../runtime/tooltips';
 import { BASE_STYLES, withDefaultTooltips } from './app-schema';
+import { FANCY_TEMPLATES } from './fancy-templates';
 
 export const TEMPLATE_KEY = 'mapstyler:template';
 
-export const routeLineTemplate = () => '<strong>{name}</strong>\n{distance_km} km\n<span style="opacity:.7">{duration_label}</span>';
+export const routeLineTemplate = () => '<strong>{name}</strong>\n<i class="msx-icon-{mode}"></i>{trip_label}';
 const ROUTE_POINT_TEMPLATE = '<strong>{name}</strong>\n<span style="opacity:.7">{label}</span>';
 
 export type Template = {
@@ -30,12 +31,16 @@ export type Template = {
   route?: Partial<RouteConfig>;
   /** Tooltip templates for the route layers, if the defaults do not fit. */
   routeTooltips?: { line?: string; points?: string };
+  /** Camera to move to when the template is loaded (e.g. tilted for 3D). */
+  view?: { center?: [number, number]; zoom?: number; pitch?: number; bearing?: number };
+  /** Final touches that a color recipe cannot express (3D, sky, patterns …). */
+  extras?: (style: Style) => Style;
 };
 
 const INTER = '"Inter Variable", "Inter", system-ui, sans-serif';
 const MONO = 'ui-monospace, "SF Mono", Menlo, monospace';
 
-export const TEMPLATES: Template[] = [
+const CORE_TEMPLATES: Template[] = [
   {
     id: 'baral-sand',
     name: 'Baral Sand',
@@ -377,6 +382,7 @@ export async function buildTemplate(template: Template): Promise<Style> {
   if (template.language) style = applyLabelLanguage(style, getLang()).style;
   style = withDefaultTooltips({ ...style, name: t(template.name) });
   style = applyRoute(style, { ...DEFAULT_ROUTE, ...template.route }, sampleRoute());
+  if (template.extras) style = template.extras(style);
   style = withRouteTooltips(style);
   const tooltipsBase = normalizeTooltips(style.metadata?.[TOOLTIP_KEY]);
   if (template.routeTooltips?.line) tooltipsBase.layers['route-line'] = { enabled: true, template: template.routeTooltips.line };
@@ -388,3 +394,6 @@ export async function buildTemplate(template: Template): Promise<Style> {
   if (template.trigger) tooltips.trigger = template.trigger;
   return { ...style, metadata: { ...(style.metadata ?? {}), [TOOLTIP_KEY]: tooltips, [TEMPLATE_KEY]: template.id } };
 }
+
+/** Baral Sand and Minimal first, then the 3D/ASCII looks, then the classics. */
+export const TEMPLATES: Template[] = [...CORE_TEMPLATES.slice(0, 2), ...FANCY_TEMPLATES, ...CORE_TEMPLATES.slice(2)];

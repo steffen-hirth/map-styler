@@ -104,6 +104,16 @@ export function durationLabel(minutes: number | undefined, mode: RouteMode): str
   return `${tr('ca.', 'about')} ${time} ${tr(...MODE_PHRASE[mode])}`;
 }
 
+const formatKm = (km: number) => tr(String(km).replace('.', ','), String(km));
+
+/** Compact trip summary for tooltips, e.g. "37 min · 7,7 km"; the mode is shown as an icon. */
+export function tripLabel(distanceKm: number | undefined, minutes: number | undefined): string {
+  const h = minutes ? Math.floor(minutes / 60) : 0;
+  const m = minutes ? minutes % 60 : 0;
+  const time = minutes ? (h ? `${h} h${m ? ` ${m} min` : ''}` : `${m} min`) : '';
+  return [time, distanceKm !== undefined ? `${formatKm(distanceKm)} km` : ''].filter(Boolean).join(' · ');
+}
+
 // Walking route via OSRM (FOSSGIS), simplified to ~100 points.
 const SAMPLE_LINE: Position[] = [
   [9.18111, 48.78425], [9.18045, 48.78356], [9.18193, 48.78292], [9.18183, 48.78275], [9.18209, 48.78265], [9.18116, 48.78157],
@@ -144,6 +154,7 @@ export function sampleRoute(): FeatureCollection {
           distance_km: 6.7,
           duration_min: 88,
           duration_label: durationLabel(88, 'foot'),
+          trip_label: tripLabel(6.7, 88),
         },
         geometry: { type: 'LineString', coordinates: SAMPLE_LINE },
       },

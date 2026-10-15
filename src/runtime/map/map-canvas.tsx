@@ -32,6 +32,8 @@ export function MapCanvas() {
     map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right');
     map.addControl(new maplibregl.ScaleControl({ unit: 'metric' }), 'bottom-right');
     mapHolder.set(map);
+    // Handy for debugging styles in the dev console; not part of production builds.
+    if (import.meta.env.DEV) (window as unknown as { __map?: unknown }).__map = map;
 
     const tooltips = attach(map, { config: tooltipConfigOf(initial), maplibregl });
 

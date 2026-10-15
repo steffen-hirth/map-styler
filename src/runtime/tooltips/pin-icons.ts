@@ -74,3 +74,37 @@ export function drawPinImage(id: string): { width: number; height: number; data:
   const image = ctx.getImageData(0, 0, SIZE, SIZE);
   return { width: SIZE, height: SIZE, data: image.data };
 }
+
+// ASCII fill patterns ---------------------------------------------------------
+
+export const PATTERN_PREFIX = 'msx-ascii-';
+
+const PATTERN_CHARS = { dot: '·', tilde: '~', hash: '#', plus: '+', slash: '/', colon: ':', dash: '-', star: '*' } as const;
+export type PatternChar = keyof typeof PATTERN_CHARS;
+
+/** Image id for a fill-pattern: one character on a background, e.g. "msx-ascii-hash-33ff66-0a0f0a". */
+export function patternImageId(char: PatternChar, fg: string, bg: string): string {
+  const clean = (c: string) => c.replace('#', '').toLowerCase();
+  return `${PATTERN_PREFIX}${char}-${clean(fg)}-${clean(bg)}`;
+}
+
+const TILE = 28;
+
+export function drawPatternImage(id: string): { width: number; height: number; data: Uint8ClampedArray } | null {
+  if (!id.startsWith(PATTERN_PREFIX) || typeof document === 'undefined') return null;
+  const match = /^([a-z]+)-([0-9a-f]{6})-([0-9a-f]{6})$/i.exec(id.slice(PATTERN_PREFIX.length));
+  if (!match || !(match[1] in PATTERN_CHARS)) return null;
+  const canvas = document.createElement('canvas');
+  canvas.width = TILE;
+  canvas.height = TILE;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return null;
+  ctx.fillStyle = `#${match[3]}`;
+  ctx.fillRect(0, 0, TILE, TILE);
+  ctx.fillStyle = `#${match[2]}`;
+  ctx.font = '600 20px ui-monospace, "SF Mono", Menlo, Consolas, monospace';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(PATTERN_CHARS[match[1] as PatternChar], TILE / 2, TILE / 2 + 1);
+  return { width: TILE, height: TILE, data: ctx.getImageData(0, 0, TILE, TILE).data };
+}
