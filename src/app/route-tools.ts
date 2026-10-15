@@ -4,7 +4,7 @@
 import type { Map as MapLibreMap, MapLayerMouseEvent, MapMouseEvent } from 'maplibre-gl';
 import { useEffect, useSyncExternalStore } from 'react';
 import { toast } from 'sonner';
-import { t } from '../i18n';
+import { getLang, t } from '../i18n';
 import { mapHolder, useMapInstance } from '../runtime/map/map-holder';
 import { computeLine, straightLine, usesRoutingService } from '../runtime/routing';
 import { store } from '../runtime/state/store';
@@ -121,6 +121,62 @@ function nearestStation(map: MapLibreMap, at: Position): { name: string; coordin
   return best && best.d < 0.0055 ? { name: best.name, coordinates: round(best.coordinates) } : null;
 }
 
+/** Distance in degrees (longitude scaled by latitude) from a point to a geometry. */
+function distanceTo(geometry: { type: string; coordinates: unknown }, at: Position): number {
+  const k = Math.cos((at[1] * Math.PI) / 180);
+  const d = (p: Position) => Math.hypot((p[0] - at[0]) * k, p[1] - at[1]);
+  const segment = (a: Position, b: Position) => {
+    const ax = (a[0] - at[0]) * k, ay = a[1] - at[1], bx = (b[0] - at[0]) * k, by = b[1] - at[1];
+    const dx = bx - ax, dy = by - ay;
+    const len = dx * dx + dy * dy;
+    const s = len ? Math.max(0, Math.min(1, -(ax * dx + ay * dy) / len)) : 0;
+    return Math.hypot(ax + s * dx, ay + s * dy);
+  };
+  const line = (coords: Position[]) => coords.reduce((min, p, i) => (i ? Math.min(min, segment(coords[i - 1], p)) : d(p)), Infinity);
+  if (geometry.type === 'Point') return d(geometry.coordinates as Position);
+  if (geometry.type === 'LineString') return line(geometry.coordinates as Position[]);
+  if (geometry.type === 'MultiLineString') return Math.min(...(geometry.coordinates as Position[][]).map(line));
+  return Infinity;
+}
+
+// Where to look for a name, in order of preference, with a maximum distance in degrees.
+const NAME_SOURCES: Array<{ sourceLayer: string; max: number }> = [
+  { sourceLayer: 'poi', max: 0.0009 },
+  { sourceLayer: 'mountain_peak', max: 0.0018 },
+  { sourceLayer: 'transportation_name', max: 0.0006 },
+  { sourceLayer: 'place', max: 0.025 },
+];
+
+/**
+ * Name of the place at a position, read from the loaded vector tiles (no
+ * geocoding service): a nearby POI, peak or street, else the neighbourhood.
+ */
+export function placeNameAt(map: MapLibreMap, at: Position): string | null {
+  const sources = Object.entries(map.getStyle().sources ?? {})
+    .filter(([, s]) => (s as { type?: string }).type === 'vector')
+    .map(([id]) => id);
+  const key = `name:${getLang()}`;
+  for (const { sourceLayer, max } of NAME_SOURCES) {
+    let best: { name: string; d: number } | null = null;
+    for (const source of sources) {
+      let features: ReturnType<MapLibreMap['querySourceFeatures']> = [];
+      try {
+        features = map.querySourceFeatures(source, { sourceLayer });
+      } catch {
+        continue;
+      }
+      for (const f of features) {
+        const name = String(f.properties?.[key] ?? f.properties?.name ?? '').trim();
+        if (!name) continue;
+        const d = distanceTo(f.geometry, at);
+        if (d <= max && (!best || d < best.d)) best = { name, d };
+      }
+    }
+    if (best) return best.name;
+  }
+  return null;
+}
+
 const POINT_LAYERS = ['route-points', 'route-pins'];
 
 /** Click-to-add and drag-to-move while the routes panel is open. */
@@ -136,12 +192,12 @@ export function useRouteMapTools(enabled: boolean) {
       const at = round([e.lngLat.lng, e.lngLat.lat]);
       const { points } = currentRoute();
       if (mapTool === 'pin') {
-        void setRoutePoints(addPin(points, at, pinType, pinTypeLabel(pinType)), { recompute: false });
+        void setRoutePoints(addPin(points, at, pinType, placeNameAt(map, at) || pinTypeLabel(pinType)), { recompute: false });
         return;
       }
       const station = routeConfigOf(store.getState().style).mode === 'train' ? nearestStation(map, at) : null;
       const count = points.filter(isStop).length + 1;
-      void setRoutePoints(addStop(points, station?.coordinates ?? at, station?.name || t('Stopp {n}', { n: count })));
+      void setRoutePoints(addStop(points, station?.coordinates ?? at, station?.name || placeNameAt(map, at) || t('Stopp {n}', { n: count })));
     };
 
     let dragging: { id: string; stop: boolean; moved: boolean } | null = null;
@@ -174,8 +230,19 @@ export function useRouteMapTools(enabled: boolean) {
       const done = dragging;
       dragging = null;
       if (!done?.moved) return;
-      if (done.stop) void setRoutePoints(currentRoute().points);
-      else store.commit();
+      // Points with automatic names take the name of the place they were dropped on.
+      const { points } = currentRoute();
+      const point = points.find((p) => p.id === done.id);
+      let next = points;
+      if (point && point.autoName !== false) {
+        const station = done.stop && routeConfigOf(store.getState().style).mode === 'train' ? nearestStation(map, point.coordinates) : null;
+        const name =
+          station?.name ||
+          placeNameAt(map, point.coordinates) ||
+          (done.stop ? t('Stopp {n}', { n: points.filter(isStop).indexOf(point) + 1 }) : pinTypeLabel(point.type));
+        next = updatePoint(points, point.id, { name, coordinates: station?.coordinates ?? point.coordinates });
+      }
+      void setRoutePoints(next, { recompute: done.stop });
     };
 
     map.on('click', onClick);

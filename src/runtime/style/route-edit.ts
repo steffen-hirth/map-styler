@@ -14,6 +14,8 @@ export type RoutePoint = {
   name: string;
   description?: string;
   url?: string;
+  /** false once the user typed a name; auto names follow the point when it moves. */
+  autoName?: boolean;
   coordinates: Position;
 };
 
@@ -45,6 +47,7 @@ export function readRoute(fc: FeatureCollection | null): { points: RoutePoint[];
         name: typeof p.name === 'string' ? p.name : '',
         description: typeof p.description === 'string' ? p.description : undefined,
         url: typeof p.url === 'string' ? p.url : undefined,
+        autoName: p.auto_name === false ? false : undefined,
         coordinates: f.geometry.coordinates as Position,
       });
     } else if (!line && (f.geometry.type === 'LineString' || f.geometry.type === 'MultiLineString')) {
@@ -97,6 +100,7 @@ export function writeRoute(points: RoutePoint[], line: RouteLine | null): Featur
         label: p.kind === 'pin' ? pinTypeLabel(p.type) : stopKindLabel(p.kind),
         ...(p.description ? { description: p.description } : {}),
         ...(p.url ? { url: p.url } : {}),
+        ...(p.autoName === false ? { auto_name: false } : {}),
       },
       geometry: { type: 'Point', coordinates: p.coordinates },
     });

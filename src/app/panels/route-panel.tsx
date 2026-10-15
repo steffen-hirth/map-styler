@@ -391,7 +391,7 @@ function StopRow({ point, index, count, points }: { point: RoutePoint; index: nu
         value={point.name}
         label={t('Name')}
         className="h-7"
-        onCommit={(name) => void setRoutePoints(updatePoint(points, point.id, { name }), { recompute: false })}
+        onCommit={(name) => void setRoutePoints(updatePoint(points, point.id, { name, autoName: false }), { recompute: false })}
       />
       <div className="flex shrink-0 opacity-60 group-hover:opacity-100">
         <IconButton size="sm" label={t('Nach oben')} disabled={index === 0} onClick={() => void setRoutePoints(moveStop(points, point.id, -1))}>
@@ -417,7 +417,7 @@ function PinRow({ point, points }: { point: RoutePoint; points: RoutePoint[] }) 
         <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary text-white [&_svg]:size-3.5">
           <Icon />
         </span>
-        <CommitInput value={point.name} label={t('Name')} className="h-7" onCommit={(name) => update({ name })} />
+        <CommitInput value={point.name} label={t('Name')} className="h-7" onCommit={(name) => update({ name, autoName: false })} />
         <IconButton size="sm" label={t('Entfernen')} className="hover:text-destructive" onClick={() => void setRoutePoints(removePoint(points, point.id), { recompute: false })}>
           <X />
         </IconButton>

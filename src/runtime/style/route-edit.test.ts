@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { straightLine } from '../routing';
 import { durationLabel, sampleRoute } from './route';
-import { addPin, addStop, moveStop, readRoute, removePoint, writeRoute, type RoutePoint } from './route-edit';
+import { addPin, addStop, moveStop, readRoute, removePoint, updatePoint, writeRoute, type RoutePoint } from './route-edit';
 
 const at = (x: number): [number, number] => [9 + x / 100, 48.7];
 
@@ -38,6 +38,14 @@ describe('route editing', () => {
     const again = readRoute(writeRoute(points, line));
     expect(again.points.map((p) => p.id)).toEqual(points.map((p) => p.id));
     expect(again.line?.coordinates).toEqual(line?.coordinates);
+  });
+
+  it('remembers names the user typed', () => {
+    const points = addStop([], at(1), 'Auto');
+    const typed = updatePoint(points, points[0].id, { name: 'Mein Platz', autoName: false });
+    const again = readRoute(writeRoute(typed, null)).points[0];
+    expect(again).toMatchObject({ name: 'Mein Platz', autoName: false });
+    expect(readRoute(writeRoute(points, null)).points[0].autoName).toBeUndefined();
   });
 
   it('builds straight lines with a distance', () => {
