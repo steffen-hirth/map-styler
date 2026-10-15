@@ -355,7 +355,7 @@ export const FANCY_TEMPLATES: Template[] = [
           opacity: 0.28,
           ground: '#e9f1f6',
           edge: '#1fb4f0',
-          fx: { tint: '#dff4ff', tintStrength: 0.12, refraction: 16, blur: 1.5, rim: '#ffffff', rimStrength: 0.9, specular: 0.9 },
+          fx: { tint: '#f2faff', tintStrength: 0.32, refraction: 30, blur: 7, bevel: 4, rim: '#ffffff', rimStrength: 0.9, specular: 0.9 },
           light: { anchor: 'viewport', color: '#ffffff', intensity: 0.5, position: [1.4, 200, 35] },
           sky: {
             'sky-color': '#e3eef6',
@@ -420,7 +420,7 @@ export const FANCY_TEMPLATES: Template[] = [
       opacity: 0.38,
       ground: '#e2ebf3',
       edge: '#8fc2f2',
-      fx: { tint: '#cfe6fb', tintStrength: 0.22, refraction: 12, blur: 2.5, rim: '#ffffff', rimStrength: 0.7, specular: 0.6 },
+      fx: { tint: '#e6f2fc', tintStrength: 0.38, refraction: 26, blur: 8, bevel: 4, rim: '#ffffff', rimStrength: 0.7, specular: 0.6 },
       light: { anchor: 'viewport', color: '#ffffff', intensity: 0.45, position: [1.3, 210, 40] },
       sky: {
         'sky-color': '#cfe6fb',
@@ -469,7 +469,7 @@ export const FANCY_TEMPLATES: Template[] = [
       opacity: 0.45,
       ground: '#0c1726',
       edge: '#4fd8ff',
-      fx: { tint: '#0f3b52', tintStrength: 0.2, refraction: 16, blur: 1.5, rim: '#4fd8ff', rimStrength: 0.9, specular: 0.5 },
+      fx: { tint: '#1d4a63', tintStrength: 0.32, refraction: 30, blur: 6, bevel: 4, rim: '#4fd8ff', rimStrength: 0.9, specular: 0.5 },
       light: { anchor: 'viewport', color: '#9fe8ff', intensity: 0.6, position: [1.3, 210, 40] },
       sky: {
         'sky-color': '#05070d',

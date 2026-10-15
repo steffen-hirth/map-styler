@@ -32,9 +32,9 @@ export const DEFAULT_GLASS: GlassConfig = {
   layer: 'building-3d',
   tint: '#dff4ff',
   tintStrength: 0.18,
-  refraction: 14,
-  blur: 1.5,
-  bevel: 2.5,
+  refraction: 28,
+  blur: 6,
+  bevel: 4,
   rim: '#ffffff',
   rimStrength: 0.9,
   specular: 0.8,
@@ -237,19 +237,20 @@ void main() {
   vec2 dir = screen(v_pos + n * 0.5) - here;
   float len = length(dir);
   dir = len > 0.0 ? dir / len : vec2(0.0);
-  float strength = 0.25 + 0.75 * (1.0 - facing);
+  // Strongest at the rounded edges, like the thick rim of a glass slab.
+  float edge = max(side, top);
+  float strength = 0.2 + 1.3 * edge + 0.5 * (1.0 - facing);
   vec2 uv = gl_FragCoord.xy / u_viewport - dir * strength * u_refraction / u_viewport;
 
+  // Frosting: centre tap plus two rings of eight taps.
   vec2 px = u_blur / u_viewport;
-  vec3 color = texture2D(u_backdrop, uv).rgb * 0.2;
-  color += texture2D(u_backdrop, uv + vec2(px.x, 0.0)).rgb * 0.1;
-  color += texture2D(u_backdrop, uv - vec2(px.x, 0.0)).rgb * 0.1;
-  color += texture2D(u_backdrop, uv + vec2(0.0, px.y)).rgb * 0.1;
-  color += texture2D(u_backdrop, uv - vec2(0.0, px.y)).rgb * 0.1;
-  color += texture2D(u_backdrop, uv + px).rgb * 0.1;
-  color += texture2D(u_backdrop, uv - px).rgb * 0.1;
-  color += texture2D(u_backdrop, uv + vec2(px.x, -px.y)).rgb * 0.1;
-  color += texture2D(u_backdrop, uv + vec2(-px.x, px.y)).rgb * 0.1;
+  vec3 color = texture2D(u_backdrop, uv).rgb * 0.12;
+  for (int i = 0; i < 8; i++) {
+    float a = float(i) * 0.785398;
+    vec2 o = vec2(cos(a), sin(a));
+    color += texture2D(u_backdrop, uv + o * px * 0.5).rgb * 0.055;
+    color += texture2D(u_backdrop, uv + vec2(cos(a + 0.392699), sin(a + 0.392699)) * px).rgb * 0.055;
+  }
 
   color = mix(color, u_tint, u_tintStrength);
   // Walls slightly darker at the base, lighter towards the top.

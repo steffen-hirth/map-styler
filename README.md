@@ -126,8 +126,8 @@ The same script can render a fill-extrusion layer as refracting glass (WebGL): i
 ```json
 "metadata": {
   "mapstyler:glass": {
-    "layer": "building-3d", "tint": "#dff4ff", "tintStrength": 0.12,
-    "refraction": 16, "blur": 1.5, "bevel": 2.5,
+    "layer": "building-3d", "tint": "#f2faff", "tintStrength": 0.32,
+    "refraction": 30, "blur": 7, "bevel": 4,
     "rim": "#ffffff", "rimStrength": 0.9, "specular": 0.9
   }
 }
