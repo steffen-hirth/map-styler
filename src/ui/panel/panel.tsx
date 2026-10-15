@@ -26,7 +26,7 @@ export function PanelHeader({ title, subtitle, icon, children }: { title: ReactN
         {icon}
         <div className="flex min-w-0 flex-col">
           <p className="m-0 min-w-0 truncate text-xs-plus leading-tight font-semibold tracking-[-0.01em]">{title}</p>
-          {subtitle ? <p className="m-0 min-w-0 truncate text-[9px] leading-tight text-subtle">{subtitle}</p> : null}
+          {subtitle ? <p className="m-0 -mt-px min-w-0 truncate text-[8px] leading-none text-subtle">{subtitle}</p> : null}
         </div>
       </div>
       {children ? <div className="flex shrink-0 items-center gap-0.5">{children}</div> : null}
