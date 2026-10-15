@@ -16,7 +16,8 @@ import { LayerSwatch } from '../property-control';
 
 const PREVIEW_CLASS = 'msx-tooltip-preview';
 
-export function TooltipsPanel() {
+/** In simple mode only the essentials: preview, trigger, colors, font, size, radius, shadow. */
+export function TooltipsPanel({ simple = false }: { simple?: boolean }) {
   const meta = useAppState((s) => s.style.metadata?.[TOOLTIP_KEY]);
   const config = useMemo(() => normalizeTooltips(meta), [meta]);
   const style = config.style;
@@ -58,30 +59,42 @@ export function TooltipsPanel() {
         <Field label={t('Schriftgröße')}>
           <SliderControl value={style.fontSize} min={9} max={24} step={1} unit="px" label={t('Schriftgröße')} onChange={(v, live) => setStyle('fontSize', v, live)} />
         </Field>
+{simple ? null : (
+          <>
         <Field label={t('Zeilenhöhe')}>
           <SliderControl value={style.lineHeight} min={1} max={2} step={0.05} label={t('Zeilenhöhe')} onChange={(v, live) => setStyle('lineHeight', v, live)} />
         </Field>
         <Field label={t('Innenabstand')}>
           <SliderControl value={style.padding} min={0} max={32} step={1} unit="px" label={t('Innenabstand')} onChange={(v, live) => setStyle('padding', v, live)} />
         </Field>
+          </>
+        )}
         <Field label={t('Eckenradius')}>
           <SliderControl value={style.radius} min={0} max={24} step={1} unit="px" label={t('Eckenradius')} onChange={(v, live) => setStyle('radius', v, live)} />
         </Field>
+{simple ? null : (
+          <>
         <Field label={t('Rahmen')}>
           <ColorControl value={style.borderColor} label={t('Rahmenfarbe')} onChange={(v, live) => setStyle('borderColor', v, live)} />
         </Field>
         <Field label={t('Rahmenbreite')}>
           <SliderControl value={style.borderWidth} min={0} max={4} step={0.5} unit="px" label={t('Rahmenbreite')} onChange={(v, live) => setStyle('borderWidth', v, live)} />
         </Field>
+          </>
+        )}
         <Field label={t('Schatten')}>
           <SegmentedControl value={style.shadow} options={TOOLTIP_SHADOWS.map((o) => ({ ...o, label: t(o.label) }))} onChange={(v) => setStyle('shadow', v)} />
         </Field>
+{simple ? null : (
+          <>
         <Field label={t('Max. Breite')}>
           <SliderControl value={style.maxWidth} min={120} max={480} step={10} unit="px" label={t('Max. Breite')} onChange={(v, live) => setStyle('maxWidth', v, live)} />
         </Field>
         <SwitchControl label={t('Pfeil anzeigen')} checked={style.tip} onChange={(v) => setStyle('tip', v)} />
+          </>
+        )}
       </PanelSection>
-      <TooltipLayersSection />
+      {simple ? null : <TooltipLayersSection />}
     </PanelBody>
   );
 }

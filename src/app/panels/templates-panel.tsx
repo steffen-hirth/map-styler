@@ -18,7 +18,9 @@ export function fitToRoute(bounds = routeBounds(sampleRoute())) {
   if (!map || !bounds) return;
   const wide = window.innerWidth >= 768;
   map.fitBounds(bounds, {
-    padding: wide ? { top: 60, bottom: 90, left: 360, right: 370 } : { top: 40, bottom: 40, left: 24, right: 24 },
+    padding: wide
+      ? { top: 60, bottom: 90, left: 360, right: document.documentElement.dataset.mode === 'expert' ? 370 : 40 }
+      : { top: 40, bottom: 40, left: 24, right: 24 },
     maxZoom: 15.5,
     duration: 900,
   });

@@ -2,7 +2,7 @@
 // mapped onto a two-color ramp by its lightness, so any base style can be
 // turned into a coherent palette while keeping its internal contrast.
 
-import { formatColor, parseColor, rgbToHsl, type Rgba } from './color';
+import { formatColor, hslToRgb, parseColor, rgbToHsl, walkColors, type Rgba } from './color';
 import { groupOf, type GroupId } from './spec';
 import { mapPaintColors, setLayerProp } from './style-utils';
 import type { Style } from './types';
@@ -81,4 +81,56 @@ export function applyRecipe(style: Style, recipe: Recipe): Style {
     };
   }
   return next;
+}
+
+/** Lightest opaque paint color of a group – the color a user would call "the" group color. */
+export function groupColor(style: Style, group: GroupId): string | null {
+  let best: { color: string; l: number } | null = null;
+  for (const layer of style.layers) {
+    if (groupOf(layer) !== group || layer.layout?.visibility === 'none') continue;
+    for (const [key, value] of Object.entries(layer.paint ?? {})) {
+      if (!key.includes('color')) continue;
+      walkColors(value, (s) => {
+        const c = parseColor(s);
+        if (!c || c.a < 0.5) return;
+        const { l } = rgbToHsl(c.r, c.g, c.b);
+        if (!best || l > best.l) best = { color: formatColor(c), l };
+      });
+    }
+  }
+  return (best as { color: string } | null)?.color ?? null;
+}
+
+function lightnessRange(style: Style, group: GroupId): [number, number] | null {
+  let min = Infinity;
+  let max = -Infinity;
+  for (const layer of style.layers) {
+    if (groupOf(layer) !== group) continue;
+    for (const [key, value] of Object.entries(layer.paint ?? {})) {
+      if (!key.includes('color')) continue;
+      walkColors(value, (s) => {
+        const c = parseColor(s);
+        if (!c) return;
+        const { l } = rgbToHsl(c.r, c.g, c.b);
+        min = Math.min(min, l);
+        max = Math.max(max, l);
+      });
+    }
+  }
+  return Number.isFinite(min) ? [min, max] : null;
+}
+
+/**
+ * Recolor a whole group so its lightest color becomes `color`; darker shades
+ * (casings, outlines) keep their relative contrast below it.
+ */
+export function recolorGroupTo(style: Style, group: GroupId, color: string): Style {
+  const range = lightnessRange(style, group);
+  const target = parseColor(color);
+  if (!range || !target) return style;
+  const [lo, hi] = range;
+  if (hi - lo < 0.02) return applyRecipe(style, { ramps: { [group]: [color, color] } });
+  const { h, s, l } = rgbToHsl(target.r, target.g, target.b);
+  const darker = formatColor({ ...hslToRgb(h, s, Math.max(0, l - (hi - lo))), a: 1 });
+  return applyRecipe(style, { ramps: { [group]: [darker, color, lo, hi] } });
 }

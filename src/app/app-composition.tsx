@@ -1,6 +1,6 @@
 // Composition root: map canvas, floating panels, toolbar and dialogs.
 
-import { Layers, LayoutTemplate, Map as MapIcon, MessageSquareText, Palette, RefreshCw, Route, SlidersHorizontal } from 'lucide-react';
+import { Layers, LayoutTemplate, Map as MapIcon, MessageSquareText, Palette, RefreshCw, Route, SlidersHorizontal, Sparkles } from 'lucide-react';
 import { useEffect, type ReactNode } from 'react';
 import { setLang, t, useLang } from '../i18n';
 import { Toaster } from 'sonner';
@@ -8,10 +8,12 @@ import { MapCanvas } from '../runtime/map/map-canvas';
 import { store, useAppState, type Tab } from '../runtime/state/store';
 import { DialogHost } from '../ui/dialog/dialog-host';
 import { cn } from '../ui/lib/utils';
+import { SegmentedControl } from '../ui/controls/controls';
 import { Button } from '../ui/primitives/button';
 import { Panel, PanelHeader, PanelTabs } from '../ui/panel/panel';
 import { APP_NAME } from './app-schema';
 import { ExportDialog } from './export-dialog';
+import { BasicsPanel } from './panels/basics-panel';
 import { GlobalPanel } from './panels/global-panel';
 import { InspectorCard } from './panels/inspector-card';
 import { LayersPanel } from './panels/layers-panel';
@@ -22,6 +24,7 @@ import { TemplatesPanel } from './panels/templates-panel';
 import { TooltipsPanel } from './panels/tooltips-panel';
 import { buildTemplate, TEMPLATES } from './templates';
 import { Toolbar } from './toolbar';
+import { setUiMode, SIMPLE_TABS, useUiMode } from './ui-mode';
 
 const TABS: Array<{ value: Tab; label: string; icon: ReactNode }> = [
   { value: 'templates', label: 'Vorlagen', icon: <LayoutTemplate /> },
@@ -57,9 +60,10 @@ function useShortcuts() {
         e.preventDefault();
         store.redo();
       } else if (e.key === 'Escape') {
-        const { inspect, selectedId, exportOpen } = store.getState();
+        const { inspect, selectedId, exportOpen, mapTool } = store.getState();
         if (exportOpen || target?.closest('[role="dialog"]')) return;
-        if (inspect) store.setUi({ inspect: false, inspected: null });
+        if (mapTool) store.setUi({ mapTool: null });
+        else if (inspect) store.setUi({ inspect: false, inspected: null });
         else if (selectedId) store.setUi({ selectedId: null });
       }
     };
@@ -90,8 +94,27 @@ function LangSwitch() {
   );
 }
 
+function ModeSwitch() {
+  const mode = useUiMode();
+  return (
+    <div className="shrink-0 px-3 pb-2.5">
+      <SegmentedControl
+        value={mode}
+        className="h-9"
+        options={[
+          { value: 'simple', label: <><Sparkles /> {t('Einfach')}</>, title: t('Vorlagen und die wichtigsten Einstellungen') },
+          { value: 'expert', label: <><SlidersHorizontal /> {t('Experte')}</>, title: t('Alle Ebenen und Eigenschaften im Detail') },
+        ]}
+        onChange={setUiMode}
+      />
+    </div>
+  );
+}
+
 function LeftPanel({ className }: { className?: string }) {
   const tab = useAppState((s) => s.tab);
+  const simple = useUiMode() === 'simple';
+  const tabs = simple ? TABS.filter((item) => SIMPLE_TABS.includes(item.value)) : TABS;
   return (
     <Panel className={className}>
       <PanelHeader
@@ -104,13 +127,14 @@ function LeftPanel({ className }: { className?: string }) {
       >
         <LangSwitch />
       </PanelHeader>
-      <PanelTabs value={tab} items={TABS.map((item) => ({ ...item, label: t(item.label) }))} onChange={(value) => store.setUi({ tab: value })} />
+      <ModeSwitch />
+      <PanelTabs value={tab} items={tabs.map((item) => ({ ...item, label: t(item.label) }))} onChange={(value) => store.setUi({ tab: value })} />
       {tab === 'templates' ? <TemplatesPanel /> : null}
-      {tab === 'route' ? <RoutePanel /> : null}
-      {tab === 'layers' ? <LayersPanel /> : null}
-      {tab === 'palette' ? <PalettePanel /> : null}
-      {tab === 'global' ? <GlobalPanel /> : null}
-      {tab === 'tooltips' ? <TooltipsPanel /> : null}
+      {tab === 'route' ? <RoutePanel simple={simple} /> : null}
+      {tab === 'palette' ? simple ? <BasicsPanel /> : <PalettePanel /> : null}
+      {tab === 'tooltips' ? <TooltipsPanel simple={simple} /> : null}
+      {!simple && tab === 'layers' ? <LayersPanel /> : null}
+      {!simple && tab === 'global' ? <GlobalPanel /> : null}
     </Panel>
   );
 }
@@ -120,6 +144,7 @@ export function AppComposition() {
   const error = useAppState((s) => s.error);
   const hasSelection = useAppState((s) => s.selectedId !== null);
   const lang = useLang();
+  const expert = useUiMode() === 'expert';
   useShortcuts();
 
   useEffect(() => {
@@ -152,17 +177,19 @@ export function AppComposition() {
             className={cn(
               'absolute top-3 bottom-3 left-3 w-[320px]',
               'max-md:inset-x-2 max-md:top-auto max-md:bottom-16 max-md:h-[44vh] max-md:w-auto',
-              hasSelection && 'max-md:hidden',
+              expert && hasSelection && 'max-md:hidden',
             )}
           />
-          <PropertiesPanel
-            className={cn(
-              'absolute top-3 right-3 bottom-3 w-[332px]',
-              'max-md:inset-x-2 max-md:top-auto max-md:bottom-16 max-md:h-[44vh] max-md:w-auto',
-              !hasSelection && 'max-md:hidden',
-            )}
-          />
-          <InspectorCard className="absolute top-3 left-1/2 -translate-x-1/2 max-md:inset-x-2 max-md:w-auto max-md:translate-x-0" />
+          {expert ? (
+            <PropertiesPanel
+              className={cn(
+                'absolute top-3 right-3 bottom-3 w-[332px]',
+                'max-md:inset-x-2 max-md:top-auto max-md:bottom-16 max-md:h-[44vh] max-md:w-auto',
+                !hasSelection && 'max-md:hidden',
+              )}
+            />
+          ) : null}
+          {expert ? <InspectorCard className="absolute top-3 left-1/2 -translate-x-1/2 max-md:inset-x-2 max-md:w-auto max-md:translate-x-0" /> : null}
           <Toolbar className="absolute bottom-3 left-1/2 -translate-x-1/2 max-md:bottom-2 max-md:max-w-[calc(100vw-1rem)] max-md:overflow-x-auto" />
         </div>
       ) : null}

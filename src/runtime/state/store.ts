@@ -7,8 +7,12 @@ import { t } from '../../i18n';
 import { setLayerProp, uniqueLayerId } from '../style/style-utils';
 import { isStyle, type Layer, type PropKind, type Style } from '../style/types';
 import { KEY as TOOLTIP_KEY, normalize as normalizeTooltips, type TooltipConfig } from '../tooltips';
+import type { PinType } from '../tooltips/pin-icons';
 
 export type Tab = 'templates' | 'layers' | 'palette' | 'route' | 'global' | 'tooltips';
+
+/** Active map tool while editing a route: click adds a stop or a pin. */
+export type MapTool = 'stop' | 'pin' | null;
 
 export type InspectedFeature = {
   layerId: string;
@@ -30,11 +34,13 @@ export type AppState = {
   inspect: boolean;
   inspected: InspectedFeature[] | null;
   exportOpen: boolean;
+  mapTool: MapTool;
+  pinType: PinType;
   canUndo: boolean;
   canRedo: boolean;
 };
 
-type UiPatch = Partial<Pick<AppState, 'selectedId' | 'tab' | 'inspect' | 'inspected' | 'exportOpen'>>;
+type UiPatch = Partial<Pick<AppState, 'selectedId' | 'tab' | 'inspect' | 'inspected' | 'exportOpen' | 'mapTool' | 'pinType'>>;
 
 const EMPTY_STYLE: Style = { version: 8, sources: {}, layers: [] };
 const HISTORY_LIMIT = 200;
@@ -85,6 +91,8 @@ class AppStore {
     inspect: false,
     inspected: null,
     exportOpen: false,
+    mapTool: null,
+    pinType: 'pin',
     canUndo: false,
     canRedo: false,
   };

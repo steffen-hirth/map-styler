@@ -45,7 +45,7 @@ describe('route overlay', () => {
     const style = applyRoute(base(), DEFAULT_ROUTE);
     expect(style.sources[ROUTE_SOURCE]).toBeTruthy();
     expect(style.layers.map((l) => l.id)).toEqual([
-      'background', 'water', 'route-casing', 'route-line', 'route-arrows', 'place', 'poi', 'route-points', 'route-labels',
+      'background', 'water', 'route-casing', 'route-line', 'route-arrows', 'place', 'poi', 'route-points', 'route-pins', 'route-labels',
     ]);
   });
 

@@ -6,8 +6,10 @@ Runs entirely in the browser. No account, no API key, no tracking. UI in English
 
 ## Features
 
+- **Simple and expert mode** – Simple shows templates, one color per map area, route planning and the tooltip basics. Expert adds every layer and property, the palette, global adjustments and the inspector.
 - **Templates** – ten ready-made map designs, each with matching tooltips and a styled sample route: Baral Sand, Minimal (default), Dusk, Paper, Outdoor, Standard, Bright, Dataviz Light, Dataviz Dark and Blueprint. Everything stays editable afterwards.
-- **Routes** – load a GPX or GeoJSON file or use the sample route. Set color, width, opacity, line style (solid, dashed, dotted), direction arrows, casing, start/finish/waypoint markers and their labels. The route is exported with the `style.json`.
+- **Routes** – click stops onto the map and drag them around; the line follows real paths on foot, by bike or by car (OpenStreetMap routing by FOSSGIS). Train mode snaps stops to the nearest station, straight-line mode needs no routing at all. Distance and duration are calculated automatically. You can also load GPX or GeoJSON files. Style color, width, opacity, line style, arrows, casing, stops and labels. The route is exported with the `style.json`.
+- **Pins** – twelve pin types (place, highlight, café, food, parking, viewpoint, station, info, shop, home, photo spot, stay) with icons, name and an optional URL that shows up in the tooltip.
 - **Layer editor** – all layers grouped (water, roads, buildings, labels, POIs, routes …). Show/hide, reorder, duplicate, rename and delete.
 - **Every property in detail** – a fitting control for each paint and layout property (color with opacity, sliders, selects, switches, fonts).
   - **Zoom stops** – vary any value by zoom level with a stop editor and curve.
@@ -142,13 +144,15 @@ Stack: Vite, React, TypeScript, Tailwind CSS, Base UI, MapLibre GL JS.
 
 ## Privacy
 
-The editor only stores data locally in your browser (`localStorage`): the current style, the map view, the export settings and the UI language. There are no analytics, no cookies and no backend. External requests only go to the map sources (e.g. OpenFreeMap) and, for embed code, to unpkg and jsDelivr.
+The editor only stores data locally in your browser (`localStorage`): the current style, the map view, the export settings and the UI language. There are no analytics, no cookies and no backend. External requests only go to the map sources (e.g. OpenFreeMap), for embed code to unpkg and jsDelivr, and – only while you plan a route on foot, by bike or by car – the stop coordinates to the FOSSGIS routing server (routing.openstreetmap.de). Finished routes are stored in the style, so embedded maps never call the routing server.
 
 ## Data and attribution
 
 - Map data: © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors (ODbL)
 - Vector tiles and base styles: [OpenFreeMap](https://openfreemap.org), based on [OpenMapTiles](https://openmaptiles.org)
+- Routing: [OSRM](https://project-osrm.org) servers by [FOSSGIS](https://routing.openstreetmap.de) on OpenStreetMap data
 - Rendering: [MapLibre GL JS](https://maplibre.org) (BSD-3-Clause)
+- Pin icons: [Lucide](https://lucide.dev) (ISC)
 
 The base styles include the attribution and MapLibre shows it automatically. Please keep it visible in embedded maps.
 

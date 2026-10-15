@@ -2,7 +2,10 @@
 // style.metadata["mapstyler:tooltips"], so a single style.json carries both the
 // map design and its tooltips. Built separately into cdn/ for embedding.
 
-import type { MapGeoJSONFeature, MapLayerMouseEvent, Map as MapLibreMap, MapMouseEvent, Popup, PopupOptions } from 'maplibre-gl';
+import type { MapGeoJSONFeature, MapLayerMouseEvent, Map as MapLibreMap, MapMouseEvent, MapStyleImageMissingEvent, Popup, PopupOptions } from 'maplibre-gl';
+import { drawPinImage, PIN_IMAGE_PREFIX } from './pin-icons';
+
+export { PIN_TYPES, drawPinImage } from './pin-icons';
 
 export const KEY = 'mapstyler:tooltips';
 
@@ -268,6 +271,14 @@ export function attach(map: MapLibreMap, options: AttachOptions = {}): TooltipHa
   const readFromStyle = () => map.getStyle()?.metadata && (map.getStyle().metadata as Record<string, unknown>)[KEY];
   const onStyleLoad = () => update(readFromStyle());
 
+  // Pin markers ("msx-pin-<type>-<color>") are drawn on demand.
+  const onImageMissing = (e: MapStyleImageMissingEvent) => {
+    if (!e.id.startsWith(PIN_IMAGE_PREFIX) || map.hasImage(e.id)) return;
+    const image = drawPinImage(e.id);
+    if (image) map.addImage(e.id, image, { pixelRatio: 2 });
+  };
+  map.on('styleimagemissing', onImageMissing);
+
   map.on('mousemove', onMove);
   map.on('click', onClick);
   map.on('mouseout', onLeave as (e: MapLayerMouseEvent) => void);
@@ -290,6 +301,7 @@ export function attach(map: MapLibreMap, options: AttachOptions = {}): TooltipHa
       map.off('click', onClick);
       map.off('mouseout', onLeave as (e: MapLayerMouseEvent) => void);
       map.off('style.load', onStyleLoad);
+      map.off('styleimagemissing', onImageMissing);
       popup?.remove();
       styleEl.remove();
     },

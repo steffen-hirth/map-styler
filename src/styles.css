@@ -121,8 +121,9 @@
 }
 
 @media (min-width: 768px) {
-  .maplibregl-ctrl-top-right,
-  .maplibregl-ctrl-bottom-right {
+  /* Keep MapLibre controls clear of the properties panel (expert mode only). */
+  html[data-mode="expert"] .maplibregl-ctrl-top-right,
+  html[data-mode="expert"] .maplibregl-ctrl-bottom-right {
     right: 352px;
   }
   .maplibregl-ctrl-top-right {

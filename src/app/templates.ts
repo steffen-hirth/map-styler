@@ -13,7 +13,7 @@ import { BASE_STYLES, withDefaultTooltips } from './app-schema';
 
 export const TEMPLATE_KEY = 'mapstyler:template';
 
-export const routeLineTemplate = () => `<strong>{name}</strong>\n${t('{distance_km} km · {ascent_m} Hm')}`;
+export const routeLineTemplate = () => '<strong>{name}</strong>\n{distance_km} km\n<span style="opacity:.7">{duration_label}</span>';
 const ROUTE_POINT_TEMPLATE = '<strong>{name}</strong>\n<span style="opacity:.7">{label}</span>';
 
 export type Template = {

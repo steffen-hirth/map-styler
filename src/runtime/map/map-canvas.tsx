@@ -44,13 +44,15 @@ export function MapCanvas() {
       });
     };
 
-    let inspecting = false;
+    let pointing = false;
     const unsubscribe = store.subscribe(() => {
-      const { style, inspect } = store.getState();
-      if (inspect !== inspecting) {
-        inspecting = inspect;
-        tooltips.setEnabled(!inspect);
-        map.getCanvas().style.cursor = inspect ? 'crosshair' : '';
+      const { style, inspect, mapTool } = store.getState();
+      // Inspector and route tools take over clicks and the cursor.
+      const busy = inspect || mapTool !== null;
+      if (busy !== pointing) {
+        pointing = busy;
+        tooltips.setEnabled(!busy);
+        map.getCanvas().style.cursor = busy ? 'crosshair' : '';
       }
       if (style === synced) return;
       const before = synced;
