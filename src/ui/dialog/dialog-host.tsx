@@ -120,7 +120,7 @@ function DialogCard({ request }: { request: DialogRequest }) {
             onChange={(e) => setValue(e.target.value)}
           />
         ) : null}
-        <div className="flex justify-end gap-2">
+        <div className="flex justify-start gap-2">
           <Button type="button" onClick={() => close(null)}>
             {request.cancelLabel ?? t('Abbrechen')}
           </Button>
