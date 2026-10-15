@@ -32,7 +32,7 @@ const TABS: Array<{ value: Tab; label: string; icon: ReactNode }> = [
   { value: 'global', label: 'Global', icon: <SlidersHorizontal /> },
 ];
 
-const START_TEMPLATE = TEMPLATES.find((t) => t.id === 'standard') ?? TEMPLATES[0];
+const START_TEMPLATE = TEMPLATES.find((t) => t.id === 'minimal') ?? TEMPLATES[0];
 
 async function boot() {
   if (store.restore()) return;

@@ -12,9 +12,9 @@ type SliderProps = {
   className?: string;
 };
 
-// Thumb and fill glide to their target instead of jumping, which also smooths
-// keyboard steps and value changes from the number field.
-const GLIDE = 'duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]';
+// Clicks on the track, keyboard steps and typed values glide to the target.
+// While dragging the thumb follows the pointer directly, without easing lag.
+const GLIDE = 'duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] group-data-[dragging]/slider:transition-none';
 
 export function Slider({ value, min, max, step, onValueChange, onValueCommitted, label, className }: SliderProps) {
   const clamped = Math.min(max, Math.max(min, value));
@@ -26,7 +26,7 @@ export function Slider({ value, min, max, step, onValueChange, onValueCommitted,
       step={step}
       onValueChange={(v) => onValueChange(v)}
       onValueCommitted={(v) => onValueCommitted?.(v)}
-      className={cn('min-w-0 flex-1', className)}
+      className={cn('group/slider min-w-0 flex-1', className)}
     >
       <BaseSlider.Control className="flex h-8 w-full touch-none items-center px-2.5 select-none">
         <BaseSlider.Track className="relative h-2 w-full rounded-[10px] bg-[#ededef] shadow-[inset_0_1px_2px_rgba(45,45,45,0.25)]">

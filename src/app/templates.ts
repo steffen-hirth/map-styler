@@ -35,6 +35,47 @@ const MONO = 'ui-monospace, "SF Mono", Menlo, monospace';
 
 export const TEMPLATES: Template[] = [
   {
+    id: 'minimal',
+    name: 'Minimal',
+    description: 'Helles Grau, weiße Straßen – nichts lenkt von deiner Route ab.',
+    base: 'liberty',
+    preview: { colors: ['#ececed', '#e4e4e6', '#dce1e6', '#d9d6de'], route: '#5b4a6e' },
+    language: 'de',
+    recipe: {
+      ramps: {
+        background: ['#e3e3e5', '#ececed'],
+        water: ['#cdd3d9', '#dce1e6'],
+        landuse: ['#dfdfe1', '#e9e9ea'],
+        roads: ['#d2d2d5', '#ffffff'],
+        transit: ['#cfcfd2', '#dedee0'],
+        buildings: ['#d6d6d9', '#dedee1'],
+        boundaries: ['#bdbdc2', '#d0d0d4'],
+        other: ['#e0e0e2', '#eaeaeb'],
+      },
+      labels: { text: '#5b5d64', halo: 'rgba(255, 255, 255, 0.95)', haloWidth: 1.4 },
+      hide: ['poi'],
+    },
+    tooltip: {
+      background: '#ffffff',
+      color: '#1f2328',
+      radius: 10,
+      borderColor: 'rgba(31, 35, 40, 0.08)',
+      shadow: 'soft',
+      fontFamily: INTER,
+    },
+    route: {
+      color: '#5b4a6e',
+      width: 3.5,
+      casingColor: '#ffffff',
+      casingWidth: 1,
+      arrows: false,
+      pointColor: '#ffffff',
+      pointStroke: '#5b4a6e',
+      labelColor: '#1f2328',
+      labelHalo: 'rgba(255, 255, 255, 0.95)',
+    },
+  },
+  {
     id: 'dusk',
     name: 'Dämmerung',
     description: 'Dunkel und ruhig, mit warmem Pfirsich-Akzent.',
