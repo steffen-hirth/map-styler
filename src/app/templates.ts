@@ -15,7 +15,7 @@ import { FANCY_TEMPLATES } from './fancy-templates';
 export const TEMPLATE_KEY = 'mapstyler:template';
 
 export const routeLineTemplate = () => '<strong>{name}</strong>\n<i class="msx-icon-{mode}"></i>{trip_label}';
-const ROUTE_POINT_TEMPLATE = '<strong>{name}</strong>\n<span style="opacity:.7">{label}</span>';
+const ROUTE_POINT_TEMPLATE = '<strong>{name}</strong>\n<span style="opacity:.7">{label}</span>\n<a href="{url}">{url}</a>';
 
 export type Template = {
   id: string;
@@ -61,6 +61,7 @@ const CORE_TEMPLATES: Template[] = [
       },
       hide: ['labels', 'poi', 'boundaries'],
     },
+    trigger: 'click',
     tooltip: {
       background: '#ffffff',
       color: '#1a1a1a',
@@ -86,7 +87,7 @@ const CORE_TEMPLATES: Template[] = [
       labels: false,
     },
     routeTooltips: {
-      points: '<strong>{name}</strong>\n{label}\n<span style="color:#a68b5b">{url|website}</span>',
+      points: '<strong>{name}</strong>\n{label}\n<a href="{url|website}" style="color:#a68b5b">{url|website}</a>',
     },
   },
   {

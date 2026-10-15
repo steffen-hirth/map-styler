@@ -79,7 +79,8 @@ export function drawPinImage(id: string): { width: number; height: number; data:
 
 export const PATTERN_PREFIX = 'msx-ascii-';
 
-const PATTERN_CHARS = { dot: '·', tilde: '~', hash: '#', plus: '+', slash: '/', colon: ':', dash: '-', star: '*' } as const;
+// "stripe" is drawn as diagonal hatching instead of a character.
+const PATTERN_CHARS = { dot: '·', tilde: '~', hash: '#', plus: '+', slash: '/', colon: ':', dash: '-', star: '*', stripe: '' } as const;
 export type PatternChar = keyof typeof PATTERN_CHARS;
 
 /** Image id for a fill-pattern: one character on a background, e.g. "msx-ascii-hash-33ff66-0a0f0a". */
@@ -101,10 +102,44 @@ export function drawPatternImage(id: string): { width: number; height: number; d
   if (!ctx) return null;
   ctx.fillStyle = `#${match[3]}`;
   ctx.fillRect(0, 0, TILE, TILE);
+  if (match[1] === 'stripe') {
+    // Seamless 45° hatching: lines through the tile and its wrapped corners.
+    ctx.strokeStyle = `#${match[2]}`;
+    ctx.lineWidth = 5;
+    for (const offset of [-TILE, 0, TILE]) {
+      ctx.beginPath();
+      ctx.moveTo(offset, TILE);
+      ctx.lineTo(offset + TILE, 0);
+      ctx.stroke();
+    }
+    return { width: TILE, height: TILE, data: ctx.getImageData(0, 0, TILE, TILE).data };
+  }
   ctx.fillStyle = `#${match[2]}`;
   ctx.font = '600 20px ui-monospace, "SF Mono", Menlo, Consolas, monospace';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText(PATTERN_CHARS[match[1] as PatternChar], TILE / 2, TILE / 2 + 1);
   return { width: TILE, height: TILE, data: ctx.getImageData(0, 0, TILE, TILE).data };
+}
+
+// Label boxes -----------------------------------------------------------------
+
+export const BOX_PREFIX = 'msx-box-';
+
+/** Solid image for icon-text-fit label backgrounds, e.g. "msx-box-d6bf86". */
+export const boxImageId = (color: string) => `${BOX_PREFIX}${color.replace('#', '').toLowerCase()}`;
+
+export function drawBoxImage(id: string): { width: number; height: number; data: Uint8ClampedArray } | null {
+  const match = /^([0-9a-f]{6})$/i.exec(id.slice(BOX_PREFIX.length));
+  if (!id.startsWith(BOX_PREFIX) || !match) return null;
+  const size = 16;
+  const data = new Uint8ClampedArray(size * size * 4);
+  const [r, g, b] = [0, 2, 4].map((i) => parseInt(match[1].slice(i, i + 2), 16));
+  for (let i = 0; i < data.length; i += 4) {
+    data[i] = r;
+    data[i + 1] = g;
+    data[i + 2] = b;
+    data[i + 3] = 255;
+  }
+  return { width: size, height: size, data };
 }

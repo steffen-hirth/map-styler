@@ -135,9 +135,9 @@ const SAMPLE_LINE: Position[] = [
   [9.13107, 48.77003], [9.13026, 48.76958], [9.13025, 48.76951],
 ];
 
-const point = (id: string, coordinates: Position, name: string, kind: string, label: string, type: PinType = 'pin'): Feature => ({
+const point = (id: string, coordinates: Position, name: string, kind: string, label: string, type: PinType = 'pin', url?: string): Feature => ({
   type: 'Feature',
-  properties: { id, name, kind, type, label },
+  properties: { id, name, kind, type, label, ...(url ? { url } : {}) },
   geometry: { type: 'Point', coordinates },
 });
 
@@ -158,11 +158,11 @@ export function sampleRoute(): FeatureCollection {
         },
         geometry: { type: 'LineString', coordinates: SAMPLE_LINE },
       },
-      point('s1', [9.18111, 48.78425], tr('Hauptbahnhof', 'Central Station'), 'start', 'Start'),
+      point('s1', [9.18111, 48.78425], tr('Hauptbahnhof', 'Central Station'), 'start', 'Start', 'pin', 'www.bahnhof.de'),
       point('s2', [9.16755, 48.76454], 'Marienplatz', 'waypoint', stopKindLabel('waypoint')),
       point('s3', [9.16268, 48.76614], 'Karlshöhe', 'waypoint', tr('Aussichtspunkt', 'Viewpoint')),
       point('s4', [9.13025, 48.76951], 'Birkenkopf', 'end', stopKindLabel('end')),
-      point('p1', [9.16642, 48.76386], tr('Café am Marienplatz', 'Café at Marienplatz'), 'pin', pinTypeLabel('cafe'), 'cafe'),
+      point('p1', [9.16642, 48.76386], tr('Café am Marienplatz', 'Café at Marienplatz'), 'pin', pinTypeLabel('cafe'), 'cafe', 'www.stuttgart.de'),
     ],
   };
 }

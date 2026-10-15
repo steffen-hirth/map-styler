@@ -4,7 +4,7 @@
 import { groupOf } from '../runtime/style/spec';
 import { setLayerProp } from '../runtime/style/style-utils';
 import type { Layer, Style } from '../runtime/style/types';
-import { patternImageId, type PatternChar } from '../runtime/tooltips/pin-icons';
+import { boxImageId, patternImageId, type PatternChar } from '../runtime/tooltips/pin-icons';
 import type { Template } from './templates';
 
 const INTER = '"Inter Variable", "Inter", system-ui, sans-serif';
@@ -121,6 +121,177 @@ function ascii(style: Style): Style {
         return layer;
     }
   });
+}
+
+
+// Illustration, typography and play-mat looks ---------------------------------
+
+/** 3 motorway/trunk/primary, 2 secondary/tertiary, 1 streets, 0 service/paths. */
+function roadRank(id: string): number {
+  if (/motorway|trunk|primary/.test(id)) return 3;
+  if (/secondary|tertiary/.test(id)) return 2;
+  if (/service|track|path|pedestrian/.test(id)) return 0;
+  return 1;
+}
+
+const widthByRank = (rank: number, low: number[], high: number[]) => ['interpolate', ['exponential', 1.4], ['zoom'], 12, low[rank], 18, high[rank]];
+
+const isStreetName = (layer: Layer) => layer.id.startsWith('highway-name');
+const isShield = (layer: Layer) => /ref/.test(JSON.stringify(layer.layout?.['text-field'] ?? ''));
+
+const IL = { paper: '#dcdbd5', stripe: '#e8574a', ink: '#23243a', water: '#ccd2d5' };
+
+/** Print illustration: red hatched blocks, paper streets, spaced ink capitals. */
+function illustration(style: Style): Style {
+  return eachLayer(style, (layer) => {
+    const group = groupOf(layer);
+    if (layer.type === 'background') return { ...layer, paint: { 'background-pattern': patternImageId('stripe', IL.stripe, IL.paper) } };
+    if (layer.type === 'fill-extrusion') return hide(layer);
+    if (layer.type === 'fill') return group === 'water' ? { ...layer, paint: { 'fill-color': IL.water } } : hide(layer);
+    if (layer.type === 'line') {
+      if (/casing|hatching/.test(layer.id) || group === 'boundaries') return hide(layer);
+      if (group === 'water') return { ...layer, paint: { 'line-color': IL.water, 'line-width': pick(layer.paint, ['line-width'])['line-width'] ?? 2 } };
+      if (group === 'transit') return { ...layer, paint: { 'line-color': IL.ink, 'line-width': 1.6 } };
+      const rank = roadRank(layer.id);
+      return { ...layer, paint: { 'line-color': IL.paper, 'line-width': widthByRank(rank, [0.5, 1.2, 2, 3], [4, 12, 18, 24]) } };
+    }
+    if (layer.type === 'symbol') {
+      if (group === 'poi' || isShield(layer)) return hide(layer);
+      return {
+        ...layer,
+        layout: { ...layer.layout, 'text-transform': 'uppercase', 'text-letter-spacing': 0.14, 'text-font': ['Noto Sans Bold'] },
+        paint: { 'text-color': IL.ink, 'text-halo-color': IL.paper, 'text-halo-width': 1, 'icon-opacity': 0 },
+      };
+    }
+    return layer;
+  });
+}
+
+const TY = { bg: '#1d1d1d', sand: '#d6bf86', water: '#2a2a2a' };
+
+/** Street-name poster: sand streets on black, names set in sand boxes, big for big roads. */
+function typography(style: Style): Style {
+  const size = ['match', ['get', 'class'], ['motorway', 'trunk', 'primary'], 26, ['secondary', 'tertiary'], 19, 13];
+  return eachLayer(style, (layer) => {
+    const group = groupOf(layer);
+    if (layer.type === 'background') return { ...layer, paint: { 'background-color': TY.bg } };
+    if (layer.type === 'fill-extrusion') return hide(layer);
+    if (layer.type === 'fill') return group === 'water' ? { ...layer, paint: { 'fill-color': TY.water } } : hide(layer);
+    if (layer.type === 'line') {
+      if (/casing|hatching/.test(layer.id) || group === 'boundaries' || group === 'transit') return hide(layer);
+      if (group === 'water') return { ...layer, paint: { 'line-color': TY.water, 'line-width': 2 } };
+      const rank = roadRank(layer.id);
+      return { ...layer, paint: { 'line-color': TY.sand, 'line-width': widthByRank(rank, [0.3, 0.7, 1, 1.6], [1.5, 3, 5, 7]) } };
+    }
+    if (layer.type === 'symbol') {
+      if (group === 'poi' || isShield(layer)) return hide(layer);
+      if (isStreetName(layer)) {
+        return {
+          ...layer,
+          layout: {
+            ...layer.layout,
+            'text-font': ['Noto Sans Bold'],
+            'text-transform': 'uppercase',
+            'text-size': ['interpolate', ['linear'], ['zoom'], 14, ['*', size, 0.55], 18, ['*', size, 1.25]],
+            'text-letter-spacing': 0.02,
+            'text-rotation-alignment': 'map',
+            'text-max-angle': 25,
+            'text-padding': 6,
+            'symbol-spacing': 420,
+            'icon-image': boxImageId(TY.sand),
+            'icon-text-fit': 'both',
+            'icon-text-fit-padding': [1, 5, 1, 5],
+            'icon-rotation-alignment': 'map',
+          },
+          paint: { 'text-color': TY.bg, 'text-halo-width': 0, 'icon-opacity': 1 },
+        };
+      }
+      return {
+        ...layer,
+        layout: { ...layer.layout, 'text-transform': 'uppercase', 'text-font': ['Noto Sans Bold'] },
+        paint: { 'text-color': TY.sand, 'text-halo-color': TY.bg, 'text-halo-width': 2 },
+      };
+    }
+    return layer;
+  });
+}
+
+const KID = { grass: '#5aa84a', meadow: '#4c9a3d', road: '#4b5563', edge: '#3b4350', water: '#4fa3e0', sand: '#e8a35a', path: '#c9a26b' };
+
+/** Children's play mat: green land, grey roads with dashed centre lines, colourful houses. */
+function playMat(style: Style): Style {
+  const layers: Layer[] = [];
+  for (const layer of style.layers) {
+    const group = groupOf(layer);
+    if (group === 'overlay') {
+      layers.push(layer);
+      continue;
+    }
+    if (layer.type === 'background') {
+      layers.push({ ...layer, paint: { 'background-color': KID.grass } });
+    } else if (layer.type === 'fill') {
+      const color =
+        group === 'water' ? KID.water : group === 'buildings' ? '#d9473f' : /sand|beach/.test(layer.id) ? KID.sand : /wood|park|grass|forest/.test(layer.id) ? KID.meadow : KID.grass;
+      layers.push({ ...layer, paint: { 'fill-color': color, 'fill-opacity': 1 } });
+    } else if (layer.type === 'fill-extrusion') {
+      layers.push({
+        ...layer,
+        minzoom: 13,
+        paint: {
+          'fill-extrusion-color': ['match', ['%', ['round', ['coalesce', ['get', 'render_height'], 0]], 4], 0, '#e2504a', 1, '#f2c14e', 2, '#f08a4b', '#7cc4f0'],
+          'fill-extrusion-height': ['max', ['coalesce', ['get', 'render_height'], 0], 5],
+          'fill-extrusion-base': ['coalesce', ['get', 'render_min_height'], 0],
+          'fill-extrusion-opacity': 1,
+          'fill-extrusion-vertical-gradient': true,
+        },
+      });
+    } else if (layer.type === 'line') {
+      if (group === 'boundaries' || /hatching/.test(layer.id)) {
+        layers.push(hide(layer));
+        continue;
+      }
+      if (group === 'water') {
+        layers.push({ ...layer, paint: { ...pick(layer.paint, ['line-width']), 'line-color': KID.water } });
+        continue;
+      }
+      if (group !== 'roads') {
+        layers.push(layer);
+        continue;
+      }
+      const rank = roadRank(layer.id);
+      const casing = /casing/.test(layer.id);
+      const width = widthByRank(rank, casing ? [1, 2.4, 3.4, 4.8] : [0.6, 1.8, 2.8, 4], casing ? [6, 18, 26, 34] : [4, 15, 22, 30]);
+      const color = rank === 0 ? KID.path : casing ? KID.edge : KID.road;
+      layers.push({ ...layer, paint: { 'line-color': color, 'line-width': width } });
+      // Dashed white centre line on real roads.
+      if (!casing && rank >= 1) {
+        layers.push({
+          id: `${layer.id}-centerline`,
+          type: 'line',
+          source: layer.source,
+          'source-layer': layer['source-layer'],
+          filter: layer.filter,
+          minzoom: 14,
+          layout: { 'line-cap': 'butt', 'line-join': 'round' },
+          paint: { 'line-color': '#ffffff', 'line-width': ['interpolate', ['linear'], ['zoom'], 14, 0.6, 18, 2.4], 'line-dasharray': [3, 3] },
+        });
+      }
+    } else if (layer.type === 'symbol') {
+      layers.push(
+        isShield(layer)
+          ? hide(layer)
+          : { ...layer, layout: { ...layer.layout, 'text-font': ['Noto Sans Bold'] }, paint: { ...layer.paint, 'text-color': '#ffffff', 'text-halo-color': '#2d3748', 'text-halo-width': 1.8 } },
+      );
+    } else {
+      layers.push(layer);
+    }
+  }
+  return {
+    ...style,
+    layers,
+    light: { anchor: 'viewport', color: '#ffffff', intensity: 0.35, position: [1.4, 210, 40] },
+    sky: { 'sky-color': '#9fd4ff', 'horizon-color': '#dff1ff', 'fog-color': '#cfe9ff', 'sky-horizon-blend': 0.5, 'horizon-fog-blend': 0.8, 'fog-ground-blend': 0.6, 'atmosphere-blend': 0 },
+  };
 }
 
 export const FANCY_TEMPLATES: Template[] = [
@@ -326,6 +497,76 @@ export const FANCY_TEMPLATES: Template[] = [
     routeTooltips: {
       line: '&gt; {name}\n<i class="msx-icon-{mode}"></i>{trip_label}',
       points: '&gt; {name}\n<span style="opacity:.7">{label}</span>',
+    },
+  },
+  {
+    id: 'illustration',
+    name: 'Illustration',
+    description: 'Wie gedruckt: rot schraffierte Blöcke, Papierstraßen, gesperrte Versalien.',
+    base: 'liberty',
+    preview: { colors: ['#dcdbd5', '#e8a39a', '#dcdbd5', '#e8574a'], route: '#23243a' },
+    language: 'de',
+    extras: illustration,
+    view: { zoom: 15.5, pitch: 0, bearing: 0 },
+    tooltip: { background: IL.ink, color: IL.paper, radius: 2, borderWidth: 0, shadow: 'none', tip: false, fontFamily: INTER, padding: 12 },
+    route: {
+      color: IL.ink,
+      width: 3,
+      casingColor: IL.paper,
+      casingWidth: 1.5,
+      arrows: false,
+      pointColor: IL.ink,
+      pointStroke: IL.paper,
+      pinColor: IL.ink,
+      labelColor: IL.ink,
+      labelHalo: IL.paper,
+    },
+  },
+  {
+    id: 'typo',
+    name: 'Typo',
+    description: 'Poster aus Straßennamen: sandfarbene Schilder auf Schwarz.',
+    base: 'liberty',
+    preview: { colors: ['#1d1d1d', '#2a2a2a', '#1d1d1d', '#d6bf86'], route: '#e85d3f' },
+    language: 'de',
+    extras: typography,
+    view: { zoom: 16, pitch: 0, bearing: 0 },
+    tooltip: { background: TY.sand, color: TY.bg, radius: 0, borderWidth: 0, shadow: 'none', tip: true, fontFamily: INTER },
+    route: {
+      color: '#e85d3f',
+      width: 4,
+      casingColor: TY.bg,
+      casingWidth: 1.5,
+      arrows: false,
+      pointColor: TY.bg,
+      pointStroke: '#e85d3f',
+      pinColor: '#e85d3f',
+      labelColor: TY.sand,
+      labelHalo: TY.bg,
+    },
+  },
+  {
+    id: 'playmat',
+    name: 'Kinderspielteppich',
+    description: 'Grüne Wiese, graue Straßen mit Mittellinie, bunte Häuschen.',
+    base: 'liberty',
+    preview: { colors: ['#5aa84a', '#4c9a3d', '#4b5563', '#f2c14e'], route: '#ff8a3d' },
+    language: 'de',
+    extras: playMat,
+    view: { zoom: 16.2, pitch: 45, bearing: -15 },
+    tooltip: { background: '#fffdf5', color: '#2d3748', radius: 16, borderColor: '#ff8a3d', borderWidth: 2, shadow: 'soft', fontFamily: INTER },
+    route: {
+      color: '#ff8a3d',
+      width: 5,
+      dash: 'dashed',
+      casingColor: '#ffffff',
+      casingWidth: 2,
+      arrows: false,
+      pointColor: '#ffffff',
+      pointStroke: '#ff8a3d',
+      pinColor: '#ff8a3d',
+      labelColor: '#ffffff',
+      labelHalo: '#2d3748',
     },
   },
 ];

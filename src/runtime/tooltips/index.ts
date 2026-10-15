@@ -3,7 +3,7 @@
 // map design and its tooltips. Built separately into cdn/ for embedding.
 
 import type { MapGeoJSONFeature, MapLayerMouseEvent, Map as MapLibreMap, MapMouseEvent, MapStyleImageMissingEvent, Popup, PopupOptions } from 'maplibre-gl';
-import { drawPatternImage, drawPinImage, PATTERN_PREFIX, PIN_IMAGE_PREFIX } from './pin-icons';
+import { BOX_PREFIX, drawBoxImage, drawPatternImage, drawPinImage, PATTERN_PREFIX, PIN_IMAGE_PREFIX } from './pin-icons';
 
 export { PIN_TYPES, drawPinImage } from './pin-icons';
 
@@ -93,7 +93,15 @@ function lookup(expr: string, props: Record<string, unknown>): string {
   return '';
 }
 
-const ALLOWED_TAGS = new Set(['B', 'STRONG', 'I', 'EM', 'U', 'SMALL', 'SPAN', 'DIV', 'P', 'BR', 'UL', 'OL', 'LI', 'HR', 'SUB', 'SUP']);
+const ALLOWED_TAGS = new Set(['A', 'B', 'STRONG', 'I', 'EM', 'U', 'SMALL', 'SPAN', 'DIV', 'P', 'BR', 'UL', 'OL', 'LI', 'HR', 'SUB', 'SUP']);
+
+/** Only plain web links; "www.example.com" gets https:// added. */
+function safeHref(value: string): string | null {
+  const url = value.trim();
+  if (/^https?:\/\/[^\s"'<>]+$/i.test(url)) return url;
+  if (/^www\.[^\s"'<>]+$/i.test(url)) return `https://${url}`;
+  return null;
+}
 const DROPPED_TAGS = new Set(['SCRIPT', 'STYLE', 'IFRAME', 'OBJECT', 'EMBED', 'TEMPLATE', 'SVG', 'MATH']);
 
 function cleanNode(node: Node): void {
@@ -109,9 +117,19 @@ function cleanNode(node: Node): void {
         el.replaceWith(...el.childNodes);
         continue;
       }
+      const href = el.tagName === 'A' ? safeHref(el.getAttribute('href') ?? '') : null;
       for (const attr of [...el.attributes]) {
         const keep = attr.name === 'class' || (attr.name === 'style' && !/url\s*\(|expression|javascript:/i.test(attr.value));
         if (!keep) el.removeAttribute(attr.name);
+      }
+      if (el.tagName === 'A') {
+        if (!href) {
+          el.replaceWith(...el.childNodes);
+          continue;
+        }
+        el.setAttribute('href', href);
+        el.setAttribute('target', '_blank');
+        el.setAttribute('rel', 'noopener noreferrer');
       }
     } else if (child.nodeType !== 3) {
       child.remove();
@@ -190,6 +208,8 @@ export function tooltipCss(style: TooltipStyle, className: string): string {
     `${sel} .maplibregl-popup-close-button{top:6px;right:6px;width:20px;height:20px;padding:0;border-radius:6px;` +
       `color:inherit;opacity:.55;font-size:16px;line-height:18px;background:transparent;}`,
     `${sel} .maplibregl-popup-close-button:hover{opacity:1;background:rgba(127,127,127,.18);}`,
+    `${sel} a{color:inherit;text-decoration:none;}`,
+    `${sel} a:hover{text-decoration:underline;}`,
     `${sel}.msx-click .maplibregl-popup-content{padding-right:${Number(style.padding) + 24}px;}`,
     tip(['top', 'top-left', 'top-right'], 'bottom'),
     tip(['bottom', 'bottom-left', 'bottom-right'], 'top'),
@@ -300,13 +320,42 @@ export function attach(map: MapLibreMap, options: AttachOptions = {}): TooltipHa
   const onStyleLoad = () => update(readFromStyle());
 
   // Pin markers ("msx-pin-<type>-<color>") are drawn on demand.
-  // ASCII fill patterns ("msx-ascii-<char>-<fg>-<bg>") likewise.
-  const onImageMissing = (e: MapStyleImageMissingEvent) => {
-    if (map.hasImage(e.id)) return;
-    const image = e.id.startsWith(PIN_IMAGE_PREFIX) ? drawPinImage(e.id) : e.id.startsWith(PATTERN_PREFIX) ? drawPatternImage(e.id) : null;
-    if (image) map.addImage(e.id, image, { pixelRatio: 2 });
+  const addGenerated = (id: string) => {
+    if (map.hasImage(id)) return;
+    if (id.startsWith(PIN_IMAGE_PREFIX)) {
+      const image = drawPinImage(id);
+      if (image) map.addImage(id, image, { pixelRatio: 2 });
+    } else if (id.startsWith(PATTERN_PREFIX)) {
+      const image = drawPatternImage(id);
+      if (image) map.addImage(id, image, { pixelRatio: 2 });
+    } else if (id.startsWith(BOX_PREFIX)) {
+      // Stretch only the middle so label boxes keep crisp edges.
+      const image = drawBoxImage(id);
+      if (image) map.addImage(id, image, { pixelRatio: 2, stretchX: [[4, 12]], stretchY: [[4, 12]], content: [4, 4, 12, 12] });
+    }
   };
+  const onImageMissing = (e: MapStyleImageMissingEvent) => addGenerated(e.id);
   map.on('styleimagemissing', onImageMissing);
+
+  // MapLibre reports missing icons, but not missing fill/background patterns, so
+  // generated pattern and box ids are registered up front whenever the style changes.
+  const collect = (value: unknown, out: Set<string>) => {
+    if (typeof value === 'string') {
+      if (value.startsWith(PATTERN_PREFIX) || value.startsWith(BOX_PREFIX)) out.add(value);
+    } else if (Array.isArray(value)) value.forEach((v) => collect(v, out));
+    else if (value && typeof value === 'object') Object.values(value).forEach((v) => collect(v, out));
+  };
+  const onStyleData = () => {
+    const style = map.getStyle();
+    if (!style?.layers) return;
+    const ids = new Set<string>();
+    for (const layer of style.layers) {
+      collect((layer as { paint?: unknown }).paint, ids);
+      collect((layer as { layout?: unknown }).layout, ids);
+    }
+    ids.forEach(addGenerated);
+  };
+  map.on('styledata', onStyleData);
 
   map.on('mousemove', onMove);
   map.on('click', onClick);
@@ -331,6 +380,7 @@ export function attach(map: MapLibreMap, options: AttachOptions = {}): TooltipHa
       map.off('mouseout', onLeave as (e: MapLayerMouseEvent) => void);
       map.off('style.load', onStyleLoad);
       map.off('styleimagemissing', onImageMissing);
+      map.off('styledata', onStyleData);
       popup?.remove();
       styleEl.remove();
     },
