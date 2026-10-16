@@ -13,7 +13,8 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "build:react": "vite build --config vite.react.config.ts && tsc -p tsconfig.react.json",
-    "build:sanity": "vite build --config vite.sanity.config.ts && tsc -p tsconfig.sanity.json"
+    "build:sanity": "vite build --config vite.sanity.config.ts && tsc -p tsconfig.sanity.json",
+    "studio": "cd studio && DO_NOT_TRACK=1 sanity dev"
   },
   "dependencies": {
     "@base-ui/react": "^1.4.1",

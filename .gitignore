@@ -4,3 +4,7 @@ dist/
 *.log
 dist-react/
 dist-sanity/
+studio/.env
+studio/dist/
+studio/.sanity/
+studio/node_modules

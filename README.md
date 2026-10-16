@@ -191,6 +191,8 @@ export default defineConfig({
 | `mapView` | Camera (center, zoom, tilt, rotation), set up on a live preview of the map. |
 | `styledMap` | The "Map" document: style, pins, view and tooltip template. Render it with `<StyledMap>`. |
 
+**Local test studio:** copy `studio/.env.example` to `studio/.env`, enter your project ID, add `http://localhost:3333` as a CORS origin (with credentials) in sanity.io/manage, then run `npm run studio`. It shows the "Map" document and a sample "Place" type with a `mapLocation` field. CLI telemetry is turned off via `DO_NOT_TRACK=1`.
+
 Address search uses OpenStreetMap Nominatim by default (light interactive use only, search terms go to the OpenStreetMap Foundation). Pass `geocoder: false` to hide it or your own `geocoder: (query, signal) => Promise<{ label, lat, lng }[]>`. Build with `npm run build:sanity`; `examples/sanity-input.html` shows the input outside a Studio.
 
 ### Glass buildings
