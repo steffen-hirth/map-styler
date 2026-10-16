@@ -197,12 +197,16 @@ export type PinsOptions = {
   filterList?: boolean;
   /** Class put on the list item / filter button that is active (default "is-active"). */
   activeClass?: string;
+  /** Called when a pin is clicked on the map. */
+  onSelect?: (pin: Pin) => void;
 };
 
 export type PinsHandle = {
   pins(): Pin[];
   setFilter(category: string | null): void;
   focus(id: string): void;
+  /** Replace the GeoJSON pins (e.g. new props in React) and redraw. */
+  setData(data: string | FeatureCollection | undefined): Promise<void>;
   refresh(): Promise<void>;
   destroy(): void;
 };
@@ -222,6 +226,10 @@ export function addPins(map: MapLibreMap, options: PinsOptions, hooks: Hooks): P
   let filter: string | null = null;
   let fitted = options.fit === false;
   let destroyed = false;
+  let data = options.data;
+  let loaded = false;
+  // A focus requested before the pins are loaded runs once they are.
+  let pendingFocus: string | null = null;
 
   const visible = () => all.filter((pin) => matchesFilter(pin, filter));
   const collection = () => toFeatureCollection(visible(), colors);
@@ -325,8 +333,8 @@ export function addPins(map: MapLibreMap, options: PinsOptions, hooks: Hooks): P
       byId = parsed.byId;
     }
     let dataPins: Pin[] = [];
-    if (options.data) {
-      const json = typeof options.data === 'string' ? ((await (await fetch(options.data)).json()) as FeatureCollection) : options.data;
+    if (data) {
+      const json = typeof data === 'string' ? ((await (await fetch(data)).json()) as FeatureCollection) : data;
       dataPins = pinsFromGeoJSON(json);
     }
     all = [...elementPins, ...dataPins];
@@ -342,6 +350,10 @@ export function addPins(map: MapLibreMap, options: PinsOptions, hooks: Hooks): P
   };
 
   const focus = (id: string) => {
+    if (!loaded) {
+      pendingFocus = id;
+      return;
+    }
     const pin = all.find((p) => p.id === id);
     if (!pin) return;
     if (!matchesFilter(pin, filter)) {
@@ -364,6 +376,13 @@ export function addPins(map: MapLibreMap, options: PinsOptions, hooks: Hooks): P
     if (clusterId == null || !source || feature?.geometry.type !== 'Point') return;
     const zoom = await source.getClusterExpansionZoom(clusterId);
     map.easeTo({ center: feature.geometry.coordinates as [number, number], zoom: zoom + 0.3, duration: 500 });
+  };
+  const onPinClick = (e: MapLayerMouseEvent) => {
+    const id = String(e.features?.[0]?.properties?.id ?? '');
+    const pin = all.find((p) => p.id === id);
+    if (!pin) return;
+    highlight(id);
+    options.onSelect?.(pin);
   };
   const setPointer = () => (map.getCanvas().style.cursor = 'pointer');
   const clearPointer = () => (map.getCanvas().style.cursor = '');
@@ -403,6 +422,12 @@ export function addPins(map: MapLibreMap, options: PinsOptions, hooks: Hooks): P
     if (destroyed) return;
     render();
     fit();
+    loaded = true;
+    if (pendingFocus) {
+      const id = pendingFocus;
+      pendingFocus = null;
+      focus(id);
+    }
   };
 
   const start = () => {
@@ -411,6 +436,7 @@ export function addPins(map: MapLibreMap, options: PinsOptions, hooks: Hooks): P
     map.on('mousemove', PINS_LAYER, onPinMove);
     map.on('mouseleave', PINS_LAYER, onPinLeave);
     map.on('click', CLUSTER_LAYER, onClusterClick);
+    map.on('click', PINS_LAYER, onPinClick);
     map.on('mouseenter', CLUSTER_LAYER, setPointer);
     map.on('mouseleave', CLUSTER_LAYER, clearPointer);
     if (typeof document !== 'undefined') {
@@ -437,6 +463,10 @@ export function addPins(map: MapLibreMap, options: PinsOptions, hooks: Hooks): P
       render();
     },
     focus,
+    async setData(next) {
+      data = next;
+      await refresh();
+    },
     refresh,
     destroy() {
       destroyed = true;
@@ -446,6 +476,7 @@ export function addPins(map: MapLibreMap, options: PinsOptions, hooks: Hooks): P
       map.off('mousemove', PINS_LAYER, onPinMove);
       map.off('mouseleave', PINS_LAYER, onPinLeave);
       map.off('click', CLUSTER_LAYER, onClusterClick);
+      map.off('click', PINS_LAYER, onPinClick);
       map.off('mouseenter', CLUSTER_LAYER, setPointer);
       map.off('mouseleave', CLUSTER_LAYER, clearPointer);
       if (typeof document !== 'undefined') document.removeEventListener('click', onDocumentClick);

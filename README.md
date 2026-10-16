@@ -145,6 +145,28 @@ Give the items of a CMS list a few custom attributes and let the script turn the
 
 Clicking a list item flies to its pin and opens the tooltip; hovering a pin highlights the item (`is-active`). `pins({ data: 'places.geojson' })` reads GeoJSON instead. See `examples/cms-pins.html`.
 
+### React, Next.js and Sanity
+
+`src/react` contains `<StyledMap>`, a client component that loads MapLibre in the browser only (safe in Next.js server components). It takes documents straight from a CMS: `_id`, `title`, `slug.current`, Sanity `geopoint` fields under `location` and referenced categories (`{ title }`) are understood without mapping.
+
+```tsx
+'use client';
+import 'maplibre-gl/dist/maplibre-gl.css';
+import { StyledMap } from 'map-styler/react';
+
+// const places = await client.fetch(`*[_type == "place"]{ _id, title, location, category->{ title }, type }`)
+<StyledMap
+  mapStyle="/styles/liquid-glass.json"
+  pins={places}
+  filter={category}
+  selectedId={selected}
+  onSelect={(pin) => setSelected(pin.id)}
+  template={'<strong>{name}</strong>\n{category}'}
+/>
+```
+
+Other field names: `fields={{ location: 'address.geo', name: 'headline', category: 'kind' }}`. Build the package with `npm run build:react` (output in `dist-react/`). See `examples/react-pins.html`.
+
 ### Glass buildings
 
 The same script can render a fill-extrusion layer as refracting glass (WebGL): it copies the map drawn so far into a texture and draws the buildings with refraction, frosting, a tint and bright rounded edges. Enable it in the style:

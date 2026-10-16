@@ -11,7 +11,8 @@
     "build:cdn": "vite build --config vite.cdn.config.ts",
     "preview": "vite preview",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "build:react": "vite build --config vite.react.config.ts && tsc -p tsconfig.react.json"
   },
   "dependencies": {
     "@base-ui/react": "^1.4.1",
