@@ -122,6 +122,29 @@ For bundlers there is also `cdn/mapstyler-tooltips.mjs` as an ES module.
 }
 ```
 
+### Pins from a CMS (Webflow, WordPress, any HTML)
+
+Give the items of a CMS list a few custom attributes and let the script turn them into clustered, filterable pins with tooltips. In Webflow, bind the attribute values to collection fields.
+
+```html
+<div data-map-pin data-lat="48.7661" data-lng="9.1627" data-name="Karlshöhe" data-category="Viewpoint" data-type="view">…</div>
+<button data-map-filter="">All</button> <button data-map-filter="Viewpoint">Viewpoints</button>
+
+<script>
+  const styler = MapStylerTooltips.attach(map);
+  styler.pins({ colors: { Viewpoint: '#0f9d76' } });
+</script>
+```
+
+| Attribute | Meaning |
+| --- | --- |
+| `data-map-pin` | marks an element as a pin |
+| `data-lat`, `data-lng` or `data-coordinates="lat, lng"` | position (decimal comma works too) |
+| `data-name`, `data-category`, `data-type`, `data-color`, `data-url` | name, filter group, pin icon (`cafe`, `shop`, `view`, …), color, link |
+| any other `data-*` | available in the tooltip as `{field}` |
+
+Clicking a list item flies to its pin and opens the tooltip; hovering a pin highlights the item (`is-active`). `pins({ data: 'places.geojson' })` reads GeoJSON instead. See `examples/cms-pins.html`.
+
 ### Glass buildings
 
 The same script can render a fill-extrusion layer as refracting glass (WebGL): it copies the map drawn so far into a texture and draws the buildings with refraction, frosting, a tint and bright rounded edges. Enable it in the style:

@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CMS pins demo</title>
+    <!--
+      Demo: pins from a CMS list. The markup mimics a Webflow collection list
+      (w-dyn-list / w-dyn-item); each item carries custom attributes that
+      Webflow can bind to CMS fields:
+        data-map-pin  data-lat  data-lng  data-name  data-category  data-type  data-url
+      Buttons with data-map-filter="<category>" filter list and map.
+    -->
+    <style>
+      :root {
+        --ink: #1f2328;
+        --muted: #6b7280;
+        --line: rgba(31, 35, 40, 0.1);
+        --accent: #4f46e5;
+        font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+        color: var(--ink);
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: #f6f6f4; }
+      .page { display: grid; grid-template-columns: 360px 1fr; height: 100vh; }
+      .sidebar { display: flex; flex-direction: column; min-height: 0; border-right: 1px solid var(--line); background: #fff; }
+      .sidebar header { padding: 20px 20px 12px; }
+      .sidebar h1 { margin: 0 0 4px; font-size: 18px; }
+      .sidebar p { margin: 0; font-size: 13px; color: var(--muted); }
+      .filters { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 20px 14px; border-bottom: 1px solid var(--line); }
+      .filters button { cursor: pointer; border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 6px 12px; font: inherit; font-size: 12px; color: var(--ink); }
+      .filters button.is-active { background: var(--ink); border-color: var(--ink); color: #fff; }
+      .w-dyn-list { overflow-y: auto; min-height: 0; }
+      .w-dyn-items { display: flex; flex-direction: column; }
+      .w-dyn-item { cursor: pointer; padding: 14px 20px; border-bottom: 1px solid var(--line); transition: background 0.15s; }
+      .w-dyn-item:hover, .w-dyn-item.is-active { background: #f3f4ff; }
+      .w-dyn-item h3 { margin: 0 0 2px; font-size: 14px; }
+      .w-dyn-item .meta { font-size: 12px; color: var(--muted); }
+      .w-dyn-item a { font-size: 12px; color: var(--accent); text-decoration: none; }
+      #map { height: 100vh; }
+      @media (max-width: 720px) {
+        .page { grid-template-columns: 1fr; grid-template-rows: 50vh 1fr; height: auto; }
+        #map { height: 50vh; order: -1; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <aside class="sidebar">
+        <header>
+          <h1>Lieblingsorte in Stuttgart</h1>
+          <p>Klick auf einen Eintrag zeigt ihn auf der Karte.</p>
+        </header>
+        <div class="filters">
+          <button data-map-filter="">Alle</button>
+          <button data-map-filter="Café">Cafés</button>
+          <button data-map-filter="Shop">Läden</button>
+          <button data-map-filter="Aussicht">Aussicht</button>
+          <button data-map-filter="Museum">Museen</button>
+        </div>
+        <div class="w-dyn-list">
+          <div role="list" class="w-dyn-items">
+            <div role="listitem" class="w-dyn-item" data-map-pin data-id="roesterei" data-lat="48.7745" data-lng="9.1620" data-name="Rösterei Westend" data-category="Café" data-type="cafe" data-description="Filterkaffee und Zimtschnecken">
+              <h3>Rösterei Westend</h3><div class="meta">Café · Westen</div>
+            </div>
+            <div role="listitem" class="w-dyn-item" data-map-pin data-id="feuersee" data-lat="48.7686" data-lng="9.1676" data-name="Café am Feuersee" data-category="Café" data-type="cafe" data-description="Terrasse direkt am Wasser">
+              <h3>Café am Feuersee</h3><div class="meta">Café · Feuersee</div>
+            </div>
+            <div role="listitem" class="w-dyn-item" data-map-pin data-id="bohne" data-lat="48.7718" data-lng="9.1852" data-name="Espressobar Bohnenviertel" data-category="Café" data-type="cafe">
+              <h3>Espressobar Bohnenviertel</h3><div class="meta">Café · Bohnenviertel</div>
+            </div>
+            <div role="listitem" class="w-dyn-item" data-map-pin data-id="platten" data-lat="48.7651" data-lng="9.1702" data-name="Plattenladen Süd" data-category="Shop" data-type="shop" data-url="https://example.com">
+              <h3>Plattenladen Süd</h3><div class="meta">Laden · Süd</div><a href="https://example.com" target="_blank" rel="noopener">Website</a>
+            </div>
+            <div role="listitem" class="w-dyn-item" data-map-pin data-id="buecher" data-lat="48.7762" data-lng="9.1791" data-name="Buchhandlung am Markt" data-category="Shop" data-type="shop">
+              <h3>Buchhandlung am Markt</h3><div class="meta">Laden · Mitte</div>
+            </div>
+            <div role="listitem" class="w-dyn-item" data-map-pin data-id="concept" data-coordinates="48.7791, 9.1762" data-name="Concept Store Kronprinz" data-category="Shop" data-type="shop">
+              <h3>Concept Store Kronprinz</h3><div class="meta">Laden · Mitte</div>
+            </div>
+            <div role="listitem" class="w-dyn-item" data-map-pin data-id="karlshoehe" data-lat="48.7661" data-lng="9.1627" data-name="Karlshöhe" data-category="Aussicht" data-type="view" data-description="Blick über den Talkessel">
+              <h3>Karlshöhe</h3><div class="meta">Aussicht · Süd</div>
+            </div>
+            <div role="listitem" class="w-dyn-item" data-map-pin data-id="birkenkopf" data-lat="48.7695" data-lng="9.1302" data-name="Birkenkopf" data-category="Aussicht" data-type="view">
+              <h3>Birkenkopf</h3><div class="meta">Aussicht · West</div>
+            </div>
+            <div role="listitem" class="w-dyn-item" data-map-pin data-id="bismarck" data-lat="48.8003" data-lng="9.1690" data-name="Bismarckturm" data-category="Aussicht" data-type="view">
+              <h3>Bismarckturm</h3><div class="meta">Aussicht · Nord</div>
+            </div>
+            <div role="listitem" class="w-dyn-item" data-map-pin data-id="kunstmuseum" data-lat="48.7787" data-lng="9.1785" data-name="Kunstmuseum" data-category="Museum" data-type="info">
+              <h3>Kunstmuseum</h3><div class="meta">Museum · Schlossplatz</div>
+            </div>
+            <div role="listitem" class="w-dyn-item" data-map-pin data-id="staatsgalerie" data-lat="48.7801" data-lng="9.1868" data-name="Staatsgalerie" data-category="Museum" data-type="info">
+              <h3>Staatsgalerie</h3><div class="meta">Museum · Kulturmeile</div>
+            </div>
+            <div role="listitem" class="w-dyn-item" data-map-pin data-id="mercedes" data-lat="48.7880" data-lng="9.2340" data-name="Mercedes-Benz Museum" data-category="Museum" data-type="info">
+              <h3>Mercedes-Benz Museum</h3><div class="meta">Museum · Bad Cannstatt</div>
+            </div>
+          </div>
+        </div>
+      </aside>
+      <div id="map"></div>
+    </div>
+
+    <script type="module">
+      import maplibregl from 'maplibre-gl';
+      import 'maplibre-gl/dist/maplibre-gl.css';
+      import { attach } from '/src/runtime/tooltips/index.ts';
+      import { buildTemplate, TEMPLATES } from '/src/app/templates.ts';
+      import { removeRoute } from '/src/runtime/style/route.ts';
+
+      // Any style works; here a Map Styler template without its sample route.
+      const style = removeRoute(await buildTemplate(TEMPLATES.find((t) => t.id === 'minimal')));
+      const map = new maplibregl.Map({ container: 'map', style, center: [9.18, 48.775], zoom: 12 });
+      map.addControl(new maplibregl.NavigationControl(), 'top-right');
+
+      const styler = attach(map, { maplibregl });
+      window.pins = styler.pins({ colors: { Café: '#a16207', Shop: '#4f46e5', Aussicht: '#0f9d76', Museum: '#e0604f' } });
+    </script>
+  </body>
+</html>

@@ -5,12 +5,17 @@
 import type { MapGeoJSONFeature, MapLayerMouseEvent, Map as MapLibreMap, MapMouseEvent, MapStyleImageMissingEvent, Popup, PopupOptions } from 'maplibre-gl';
 import { attachGlass } from '../glass';
 import { attachHatch } from '../hatch';
+import { addPins, PINS_LAYER, type PinsHandle, type PinsOptions } from '../pins';
 import { kindLabel } from './kind-labels';
 import { BOX_PREFIX, drawBoxImage, drawPatternImage, drawPinImage, PATTERN_PREFIX, PIN_IMAGE_PREFIX } from './pin-icons';
 
 export { PIN_TYPES, drawPinImage } from './pin-icons';
 export { GLASS_KEY, DEFAULT_GLASS, attachGlass } from '../glass';
 export { HATCH_KEY, DEFAULT_HATCH, attachHatch } from '../hatch';
+export { parsePin, parseCoordinates, pinsFromGeoJSON, type Pin, type PinsHandle, type PinsOptions } from '../pins';
+
+/** Default tooltip for CMS pins; lines without values are dropped. */
+export const PIN_TEMPLATE = '<strong>{name}</strong>\n<span style="opacity:.7">{category}</span>\n{description}\n<a href="{url}">{url}</a>';
 
 export const KEY = 'mapstyler:tooltips';
 
@@ -260,6 +265,8 @@ export type AttachOptions = {
 export type TooltipHandle = {
   className: string;
   update(config: unknown): void;
+  /** Show pins from a CMS list or GeoJSON, with tooltips, filters and clusters. */
+  pins(options?: PinsOptions & { template?: string }): PinsHandle;
   setEnabled(enabled: boolean): void;
   destroy(): void;
 };
@@ -329,8 +336,12 @@ export function attach(map: MapLibreMap, options: AttachOptions = {}): TooltipHa
     if (cfg?.trigger === 'hover') hide();
   };
 
+  // Layers added at runtime (e.g. CMS pins) keep their tooltip across config updates.
+  const extraLayers: Record<string, TooltipLayer> = {};
+
   const update = (next: unknown) => {
     cfg = normalize(next);
+    Object.assign(cfg.layers, extraLayers);
     styleEl.textContent = tooltipCss(cfg.style, className);
     popup?.remove();
     popup = new lib.Popup({
@@ -398,14 +409,34 @@ export function attach(map: MapLibreMap, options: AttachOptions = {}): TooltipHa
     map.on('style.load', onStyleLoad);
   }
 
+  const pinHandles: PinsHandle[] = [];
+
   return {
     className,
     update,
+    pins(options = {}) {
+      const { template, ...rest } = options;
+      extraLayers[PINS_LAYER] = { enabled: true, template: template ?? PIN_TEMPLATE };
+      if (cfg) cfg.layers[PINS_LAYER] = extraLayers[PINS_LAYER];
+      const handle = addPins(map, rest, {
+        show(properties, lngLat) {
+          if (!cfg || !popup || !enabled) return;
+          const html = renderTemplate(extraLayers[PINS_LAYER].template, properties);
+          if (!html) return;
+          lastKey = `${PINS_LAYER}|${String(properties.id ?? '')}`;
+          popup.setLngLat(lngLat).setHTML(html);
+          if (!popup.isOpen()) popup.addTo(map);
+        },
+      });
+      pinHandles.push(handle);
+      return handle;
+    },
     setEnabled(value) {
       enabled = value;
       if (!enabled) hide();
     },
     destroy() {
+      pinHandles.forEach((h) => h.destroy());
       map.off('mousemove', onMove);
       map.off('click', onClick);
       map.off('mouseout', onLeave as (e: MapLayerMouseEvent) => void);
