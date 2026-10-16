@@ -1118,7 +1118,7 @@ function nt(e) {
 	}).join("\n");
 }
 function $(e, t) {
-	let n = `.${t}`, r = Q(e.background), i = (e, t) => e.map((e) => `${n}.maplibregl-popup-anchor-${e} .maplibregl-popup-tip`).join(",") + `{border-${t}-color:${r};}`;
+	let n = `.${t}`, r = Q(e.background), i = Math.max(Number(e.borderWidth) || 0, 0), a = (e, t, a) => e.map((e) => `${n}.maplibregl-popup-anchor-${e} .maplibregl-popup-tip`).join(",") + `{border-${t}-color:${r};position:relative;z-index:1;margin-${a}:-${i}px;}`;
 	return [
 		`${n} .maplibregl-popup-content{background:${r};color:${Q(e.color)};font-family:${Q(e.fontFamily)};font-size:${Number(e.fontSize)}px;line-height:${Number(e.lineHeight)};padding:${Number(e.padding)}px;border-radius:${Number(e.radius)}px;border:${Number(e.borderWidth)}px solid ${Q(e.borderColor)};box-shadow:${Ue[e.shadow] ?? Ue.soft};` + (Number(e.blur) > 0 ? `-webkit-backdrop-filter:blur(${Number(e.blur)}px) saturate(1.7);backdrop-filter:blur(${Number(e.blur)}px) saturate(1.7);` : "") + "}",
 		`${n} .maplibregl-popup-close-button{top:6px;right:6px;width:20px;height:20px;padding:0;border-radius:6px;color:inherit;opacity:.55;font-size:16px;line-height:18px;background:transparent;}`,
@@ -1126,18 +1126,18 @@ function $(e, t) {
 		`${n} a{color:inherit;text-decoration:none;}`,
 		`${n} a:hover{text-decoration:underline;}`,
 		`${n}.msx-click .maplibregl-popup-content{padding-right:${Number(e.padding) + 24}px;}`,
-		i([
+		a([
 			"top",
 			"top-left",
 			"top-right"
-		], "bottom"),
-		i([
+		], "bottom", "bottom"),
+		a([
 			"bottom",
 			"bottom-left",
 			"bottom-right"
-		], "top"),
-		i(["left"], "right"),
-		i(["right"], "left"),
+		], "top", "top"),
+		a(["left"], "right", "right"),
+		a(["right"], "left", "left"),
 		e.tip ? "" : `${n} .maplibregl-popup-tip{display:none;}`,
 		nt(n)
 	].join("\n");

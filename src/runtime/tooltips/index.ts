@@ -213,8 +213,12 @@ function iconCss(sel: string): string {
 export function tooltipCss(style: TooltipStyle, className: string): string {
   const sel = `.${className}`;
   const bg = cssValue(style.background);
-  const tip = (anchors: string[], side: string) =>
-    anchors.map((a) => `${sel}.maplibregl-popup-anchor-${a} .maplibregl-popup-tip`).join(',') + `{border-${side}-color:${bg};}`;
+  // The tip overlaps the box by the border width, so the border line doesn't
+  // run across the base of the triangle.
+  const border = Math.max(Number(style.borderWidth) || 0, 0);
+  const tip = (anchors: string[], side: string, overlap: string) =>
+    anchors.map((a) => `${sel}.maplibregl-popup-anchor-${a} .maplibregl-popup-tip`).join(',') +
+    `{border-${side}-color:${bg};position:relative;z-index:1;margin-${overlap}:-${border}px;}`;
   return [
     `${sel} .maplibregl-popup-content{background:${bg};color:${cssValue(style.color)};font-family:${cssValue(style.fontFamily)};` +
       `font-size:${Number(style.fontSize)}px;line-height:${Number(style.lineHeight)};padding:${Number(style.padding)}px;` +
@@ -231,10 +235,10 @@ export function tooltipCss(style: TooltipStyle, className: string): string {
     `${sel} a{color:inherit;text-decoration:none;}`,
     `${sel} a:hover{text-decoration:underline;}`,
     `${sel}.msx-click .maplibregl-popup-content{padding-right:${Number(style.padding) + 24}px;}`,
-    tip(['top', 'top-left', 'top-right'], 'bottom'),
-    tip(['bottom', 'bottom-left', 'bottom-right'], 'top'),
-    tip(['left'], 'right'),
-    tip(['right'], 'left'),
+    tip(['top', 'top-left', 'top-right'], 'bottom', 'bottom'),
+    tip(['bottom', 'bottom-left', 'bottom-right'], 'top', 'top'),
+    tip(['left'], 'right', 'right'),
+    tip(['right'], 'left', 'left'),
     style.tip ? '' : `${sel} .maplibregl-popup-tip{display:none;}`,
     iconCss(sel),
   ].join('\n');
