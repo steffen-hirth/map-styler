@@ -2,6 +2,9 @@
 
 A free style editor for vector maps based on **OpenFreeMap** and **OpenStreetMap**. Start from a ready-made template, fine-tune layers, colors, labels, routes and tooltips, and ship the result as a single `style.json` – for example straight from GitHub via jsDelivr.
 
+<img width="1693" height="1075" alt="preview-styler" src="https://github.com/user-attachments/assets/32bde1a8-aa42-4786-a5e2-551a38f84bf1" />
+
+
 Runs entirely in the browser. No account, no API key, no tracking. UI in English and German.
 
 ## Features
