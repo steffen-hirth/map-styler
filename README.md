@@ -167,6 +167,32 @@ import { StyledMap } from 'map-styler/react';
 
 Other field names: `fields={{ location: 'address.geo', name: 'headline', category: 'kind' }}`. Build the package with `npm run build:react` (output in `dist-react/`). See `examples/react-pins.html`.
 
+### Sanity Studio plugin
+
+`src/sanity` adds map fields to Sanity Studio – without Google Maps or an API key.
+
+```ts
+// sanity.config.ts
+import { mapStyler } from 'map-styler/sanity';
+
+export default defineConfig({
+  plugins: [
+    mapStyler({
+      styles: [{ title: 'Liquid Glass', value: 'https://cdn.example.com/styles/liquid-glass.json' }],
+    }),
+  ],
+});
+```
+
+| Type | What it is |
+| --- | --- |
+| `mapLocation` | A `geopoint` with a MapLibre input: click or drag the pin, search an address or paste "lat, lng". Use it in your own documents (`{ name: 'location', type: 'mapLocation' }`); existing geopoint data keeps working. |
+| `mapPin` | Name, location, category, icon, description, link. |
+| `mapView` | Camera (center, zoom, tilt, rotation), set up on a live preview of the map. |
+| `styledMap` | The "Map" document: style, pins, view and tooltip template. Render it with `<StyledMap>`. |
+
+Address search uses OpenStreetMap Nominatim by default (light interactive use only, search terms go to the OpenStreetMap Foundation). Pass `geocoder: false` to hide it or your own `geocoder: (query, signal) => Promise<{ label, lat, lng }[]>`. Build with `npm run build:sanity`; `examples/sanity-input.html` shows the input outside a Studio.
+
 ### Glass buildings
 
 The same script can render a fill-extrusion layer as refracting glass (WebGL): it copies the map drawn so far into a texture and draws the buildings with refraction, frosting, a tint and bright rounded edges. Enable it in the style:

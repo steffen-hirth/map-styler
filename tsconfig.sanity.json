@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outDir": "dist-sanity/types",
+    "rootDir": "src"
+  },
+  "include": ["src/sanity", "src/react", "src/runtime/pins", "src/runtime/tooltips", "src/runtime/glass", "src/runtime/hatch"],
+  "exclude": ["src/**/*.test.ts"]
+}
