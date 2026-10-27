@@ -141,7 +141,7 @@ function LeftPanel({ className }: { className?: string }) {
           </>
         }
         icon={
-          <span className="brand-gradient flex size-5 items-center justify-center rounded-md text-[#f2efe8] shadow-sm">
+          <span className="flex size-5 items-center justify-center rounded-md bg-primary text-white shadow-sm">
             <MapIcon className="size-3" />
           </span>
         }
